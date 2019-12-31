@@ -22,12 +22,11 @@ class IguserSpider(scrapy.Spider):
         json_object = json.loads(response.xpath('//script[@type="text/javascript"]')\
                                  .re('window._sharedData = (.+?);</script>')[0])
         user = json_object['entry_data']['ProfilePage'][0]['graphql']['user']
-        retrieved_at_time = time.gmtime()
 
         yield {
             'pk': 'US#' + user['username'],
-            'sk': 'US#UPDA#V1' + time.strftime("%Y-%m-%dT%H:%M:%S", retrieved_at_time),
+            'sk': 'US#UPDA#V1' + time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()),
             'id': user['id'],
-            'retrieved_at_time': retrieved_at_time,
+            'retrieved_at_time': int(time.time()),
             'json': user
         }

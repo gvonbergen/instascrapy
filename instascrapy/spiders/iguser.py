@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 import json
+import random
 import time
 
 import scrapy
 import boto3
+from scrapy.loader import ItemLoader
 
 from instascrapy.db import DynDB
-from instascrapy.helpers import get_proxies
+from instascrapy.helpers import get_proxies, read_post_shortcodes
+from instascrapy.items import IGUser
 
 
 class IguserSpider(scrapy.Spider):
@@ -28,10 +31,21 @@ class IguserSpider(scrapy.Spider):
                                  .re('window._sharedData = (.+?);</script>')[0])
         user = json_object['entry_data']['ProfilePage'][0]['graphql']['user']
 
-        yield {
-            'pk': 'US#' + user['username'],
-            'sk': 'US#UPDA#V1' + time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()),
-            'id': user['id'],
-            'retrieved_at_time': int(time.time()),
-            'json': user
-        }
+        ig_user = ItemLoader(item=IGUser(), response=response)
+
+        first_level_items = ['biography', 'external_url', 'external_url_linkshimmed', 'full_name', 'has_channel',
+                             'highlight_reel_count', 'id', 'is_business_account', 'is_joined_recently',
+                             'business_category_name', 'is_private', 'is_verified', 'profile_pic_url',
+                             'profile_pic_url_hd', 'username', 'connected_fb_page']
+        for entry in first_level_items:
+            ig_user.add_value(entry, user.get(entry))
+
+        ig_user.add_value('edge_followed_by_count', user['edge_followed_by']['count'])
+        ig_user.add_value('edge_follow_count', user['edge_follow']['count'])
+        ig_user.add_value('latest_posts', [post['node']['shortcode'] for post in
+                                           user['edge_owner_to_timeline_media']['edges']])
+        ig_user.add_value('user_json', user)
+        ig_user.add_value('retrieved_at_time', int(time.time()))
+
+        return ig_user.load_item()
+

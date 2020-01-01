@@ -4,6 +4,7 @@
 #
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/items.html
+import time
 
 import scrapy
 
@@ -28,6 +29,8 @@ class IGUser(scrapy.Item):
     username = scrapy.Field()
     connected_fb_page = scrapy.Field()
     latest_posts = scrapy.Field()
+    latest_crawl = scrapy.Field()
+    scraped_at = time.time()
 
 
 

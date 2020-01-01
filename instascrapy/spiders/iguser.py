@@ -6,6 +6,7 @@ import scrapy
 import boto3
 
 from instascrapy.db import DynDB
+from instascrapy.helpers import get_proxies
 
 
 class IguserSpider(scrapy.Spider):
@@ -13,10 +14,14 @@ class IguserSpider(scrapy.Spider):
 
     def start_requests(self):
         db = DynDB(table='instalytics_dev', region_name='eu-central-1')
+        proxy_list = get_proxies()
         all_users = db.get_all_users('GSI1')
         for user in all_users:
             url = 'https://www.instagram.com/{}/'.format(user)
-            yield scrapy.Request(url=url, callback=self.parse)
+            header_proxy = random.choice(proxy_list)
+            yield scrapy.Request(url=url, callback=self.parse,
+                                 headers={'User-Agent': header_proxy[1]},
+                                 meta={"proxy": header_proxy[0]})
 
     def parse(self, response):
         json_object = json.loads(response.xpath('//script[@type="text/javascript"]')\

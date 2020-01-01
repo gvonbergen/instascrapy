@@ -5,9 +5,14 @@
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/items.html
 import time
+from typing import Any
 
 import scrapy
+from scrapy import Field
 
+
+def list_string_to_integer(value):
+    return [int(entry) for entry in value]
 
 class IGUser(scrapy.Item):
     biography = scrapy.Field()
@@ -18,7 +23,7 @@ class IGUser(scrapy.Item):
     full_name = scrapy.Field()
     has_channel = scrapy.Field()
     highlight_reel_count = scrapy.Field()
-    id = scrapy.Field()
+    id = scrapy.Field(serializer=list_string_to_integer)
     is_business_account = scrapy.Field()
     is_joined_recently = scrapy.Field()
     business_category_name = scrapy.Field()
@@ -29,12 +34,5 @@ class IGUser(scrapy.Item):
     username = scrapy.Field()
     connected_fb_page = scrapy.Field()
     latest_posts = scrapy.Field()
-    latest_crawl = scrapy.Field()
-    scraped_at = time.time()
-
-
-
-class InstascrapyItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    retrieved_at_time = scrapy.Field()
+    user_json = scrapy.Field()

@@ -24,7 +24,7 @@ class InstascrapyPipeline(object):
 class JSONCleanser(object):
     def process_item(self, item, spider):
         return item
-
+# Todo: Implement JSON cleanser -> Likely in Item File
 
 class DynamoDBExporter(BaseItemExporter):
 
@@ -38,30 +38,29 @@ class DynamoDBExporter(BaseItemExporter):
         self.table = None
 
     def start_exporting(self):
-        db = boto3.resource(
-            'dynamodb',
+        session = boto3.Session(
             aws_access_key_id=self.aws_access_key_id,
             aws_secret_access_key=self.aws_secret_access_key,
             region_name=self.region_name,
         )
-        self.table = db.Table(self.table_name)
+        self.client = session.client('dynamodb')
 
     def finish_exporting(self):
-        self.table = None
+        self.client = None
 
     def export_item(self, item):
         serialized_item = dict(self._get_serialized_fields(item))
         additional_fields = {}
         for field in DYNAMODB_EXPORTER_IGUSER_FIELDS:
-            additional_fields[field] = serialized_item[field]
+            additional_fields[field] = self.encoder(serialized_item[field])
         if isinstance(item, IGUser):
-            self.table.put_item(
+            self.client.put_item(
                 TableName=self.table_name,
                 Item={
-                    'pk': 'US#{}'.format(serialized_item['username']),
-                    'sk': 'US#UPDA#V1#{}'.format(time.strftime("%Y-%m-%dT%H:%M:%S",
-                                                               time.localtime(serialized_item['retrieved_at_time']))),
-                    'json': serialized_item['user_json'],
+                    'pk': self.encoder('US#{}'.format(serialized_item['username'])),
+                    'sk': self.encoder('US#UPDA#V1#{}'.format(time.strftime("%Y-%m-%dT%H:%M:%S",
+                                                               time.localtime(serialized_item['retrieved_at_time'])))),
+                    'json': self.encoder(serialized_item['user_json']),
                     **additional_fields
                 }
             )

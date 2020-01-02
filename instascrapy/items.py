@@ -5,6 +5,7 @@
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/items.html
 import time
+from decimal import Decimal
 from typing import Any, List, Dict
 
 import scrapy
@@ -41,6 +42,9 @@ def dict_remove_values(values, blacklist=None):
             values_copy[k] = dict_remove_values(v, blacklist)
         if isinstance(v, list):
             values_copy[k] = list_remove_empty_values(v, blacklist)
+        if isinstance(v, float):
+            values_copy[k] = round(Decimal(v), 2)
+            continue
         if not isinstance(v, (bool, int, float)) and not v:
             del values_copy[k]
     return values_copy

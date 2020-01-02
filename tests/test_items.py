@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 from instascrapy.items import dict_remove_values
 
@@ -25,7 +27,7 @@ def test_remove_empty_values():
         'int_zero': 0, # False -> needed
         'int_value': 100, # True
         'float_zero': 0.0, # False -> needed
-        'float_value': 100.0, # True
+        'float_value': 100.004645489878465153, # True
         'none': None, # False
         'edge_owner_to_timeline_media': {'edges': [{'node': {'location': {'id': 123455,
                                                                           'slug': '',
@@ -42,7 +44,7 @@ def test_remove_empty_values():
     assert result['int_zero'] == 0
     assert result['int_value'] == 100
     assert result['float_zero'] == 0.0
-    assert result['float_value'] == 100.0
+    assert result['float_value'] == Decimal(100.00)
     assert result['edge_owner_to_timeline_media'] == {'edges': [{'node': {'location': {'id': 123455}}}]}
     with pytest.raises(KeyError):
         for key in ['string_empty', 'list_empty', 'dict_empty', 'none']:

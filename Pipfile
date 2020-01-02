@@ -9,6 +9,7 @@ verify_ssl = true
 scrapy = "==1.8.0"
 boto3 = "*"
 brotlipy = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.6"

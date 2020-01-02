@@ -5,14 +5,36 @@
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/items.html
 import time
-from typing import Any
+from typing import Any, List, Dict
 
 import scrapy
 import scrapy.loader
-from scrapy.loader.processors import TakeFirst
+from scrapy.loader.processors import TakeFirst, Compose
+
+from instascrapy.settings import REMOVAL_JSON_USER_FIELDS
+
+
+def remove_empty_values(values):
+    """Removes None/empy/zero values from a dictionary"""
+    return {k: v for k, v in values.items() if v}
+
+def remove_key_values(values, removal_list):
+    output = {}
+    for key, value in values.items():
+        if key not in removal_list and value is not None:
+            output[key] = value
+    return output
+
+def remove_user_key_values(values):
+    removal_list = REMOVAL_JSON_USER_FIELDS
+    return remove_key_values(values, removal_list)
+
 
 class IGLoader(scrapy.loader.ItemLoader):
     default_output_processor = TakeFirst()
+
+    user_json_out = Compose(TakeFirst(),
+                            remove_user_key_values)
 
 
 class IGUser(scrapy.Item):

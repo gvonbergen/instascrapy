@@ -13,30 +13,36 @@ from scrapy.loader.processors import TakeFirst, Compose
 
 from instascrapy.settings import REMOVAL_JSON_USER_FIELDS
 
-def list_remove_empty_values(values):
+
+def list_remove_empty_values(values, blacklist=None):
+    """Removes empty/none values from a list and ignores boolean (False), integers (e.g. 0)
+    and float (e.g. 0.0)"""
     for idx, v in enumerate(values):
         if isinstance(v, dict):
-            values[idx] = dict_remove_empty_values(v)
+            values[idx] = dict_remove_values(v, blacklist)
         if isinstance(v, list):
-            values[idx] = list_remove_empty_values(v)
+            values[idx] = list_remove_empty_values(v, blacklist)
         if not isinstance(v, (bool, int, float)) and not v:
             values.remove(v)
     return values
 
-def dict_remove_empty_values(values):
-    """Removes empty/none values from a dictionary and ignores boolean (False), integers (e.g. 0)
+
+def dict_remove_values(values, blacklist=None):
+    """Removes blacklisted empty/none values from a dictionary and ignores boolean (False), integers (e.g. 0)
     and float (e.g. 0.0)"""
-    # return {k:v for k,v in values.items() if v or isinstance(v, (bool, int, float))}
+    if blacklist is None:
+        blacklist = []
     values_copy = values.copy()
     for k, v in values.items():
+        if k in blacklist:
+            del values_copy[k]
         if isinstance(v, dict):
-            values_copy[k] = dict_remove_empty_values(v)
+            values_copy[k] = dict_remove_values(v, blacklist)
         if isinstance(v, list):
-            values_copy[k] = list_remove_empty_values(v)
+            values_copy[k] = list_remove_empty_values(v, blacklist)
         if not isinstance(v, (bool, int, float)) and not v:
             del values_copy[k]
     return values_copy
-
 
 
 def remove_key_values(values, removal_list):
@@ -46,16 +52,17 @@ def remove_key_values(values, removal_list):
             output[key] = value
     return output
 
+
 def remove_user_key_values(values):
-    removal_list = REMOVAL_JSON_USER_FIELDS
-    return remove_key_values(values, removal_list)
+    blacklist = REMOVAL_JSON_USER_FIELDS
+    return dict_remove_values(values, blacklist)
 
 
 class IGLoader(scrapy.loader.ItemLoader):
     default_output_processor = TakeFirst()
 
     user_json_out = Compose(TakeFirst(),
-                            dict_remove_empty_values)
+                            dict_remove_values)
 
 
 class IGUser(scrapy.Item):

@@ -1,7 +1,7 @@
 import pytest
 from instascrapy.items import dict_remove_values
 
-REMOVAL_JSON_USER_FIELDS = ['to_be_deleted']
+REMOVAL_JSON_USER_FIELDS = {'to_be_deleted'}
 
 def test_remove_empty_values():
     input = {
@@ -20,13 +20,16 @@ def test_remove_empty_values():
                         'int_value': 100,
                         'deep_nested': {'string_value': '',
                                         'int_value': 100,
-                                        'to_be_deleted': 200}},
+                                        'to_be_deleted': {'value 1': 1,
+                                                          'value 2': 2}}},
         'int_zero': 0, # False -> needed
         'int_value': 100, # True
         'float_zero': 0.0, # False -> needed
         'float_value': 100.0, # True
         'none': None, # False
-        'edge_owner_to_timeline_media': {'edges': [{'node': {'location': {'id': 123455, 'slug': ''}}}]}
+        'edge_owner_to_timeline_media': {'edges': [{'node': {'location': {'id': 123455,
+                                                                          'slug': '',
+                                                                          'to_be_deleted': 200}}}]}
     }
     result = dict_remove_values(input, REMOVAL_JSON_USER_FIELDS)
     assert result['string_filled'] == 'Test String'

@@ -36,6 +36,7 @@ def dict_remove_values(values, blacklist=None):
     for k, v in values.items():
         if k in blacklist:
             del values_copy[k]
+            continue
         if isinstance(v, dict):
             values_copy[k] = dict_remove_values(v, blacklist)
         if isinstance(v, list):
@@ -62,7 +63,7 @@ class IGLoader(scrapy.loader.ItemLoader):
     default_output_processor = TakeFirst()
 
     user_json_out = Compose(TakeFirst(),
-                            dict_remove_values)
+                            remove_user_key_values)
 
 
 class IGUser(scrapy.Item):

@@ -8,31 +8,32 @@ import time
 from typing import Any
 
 import scrapy
+import scrapy.loader
 from scrapy.loader.processors import TakeFirst
 
+class IGLoader(scrapy.loader.ItemLoader):
+    default_output_processor = TakeFirst()
 
-def list_string_to_integer(value):
-    return [int(entry) for entry in value]
 
 class IGUser(scrapy.Item):
-    biography = scrapy.Field(output_processor=TakeFirst())
-    external_url = scrapy.Field(output_processor=TakeFirst())
-    external_url_linkshimmed = scrapy.Field(output_processor=TakeFirst())
-    edge_followed_by_count = scrapy.Field(output_processor=TakeFirst())
-    edge_follow_count = scrapy.Field(output_processor=TakeFirst())
-    full_name = scrapy.Field(output_processor=TakeFirst())
-    has_channel = scrapy.Field(output_processor=TakeFirst())
-    highlight_reel_count = scrapy.Field(output_processor=TakeFirst())
-    id = scrapy.Field(serializer=int, output_processor=TakeFirst())
-    is_business_account = scrapy.Field(output_processor=TakeFirst())
-    is_joined_recently = scrapy.Field(output_processor=TakeFirst())
-    business_category_name = scrapy.Field(output_processor=TakeFirst())
-    is_private = scrapy.Field(output_processor=TakeFirst())
-    is_verified = scrapy.Field(output_processor=TakeFirst())
-    profile_pic_url = scrapy.Field(output_processor=TakeFirst())
-    profile_pic_url_hd = scrapy.Field(output_processor=TakeFirst())
-    username = scrapy.Field(output_processor=TakeFirst())
-    connected_fb_page = scrapy.Field(output_processor=TakeFirst())
-    latest_posts = scrapy.Field(output_processor=TakeFirst())
-    retrieved_at_time = scrapy.Field(output_processor=TakeFirst())
-    user_json = scrapy.Field(output_processor=TakeFirst())
+    biography = scrapy.Field()
+    external_url = scrapy.Field()
+    external_url_linkshimmed = scrapy.Field()
+    edge_followed_by_count = scrapy.Field()
+    edge_follow_count = scrapy.Field()
+    full_name = scrapy.Field()
+    has_channel = scrapy.Field()
+    highlight_reel_count = scrapy.Field()
+    id = scrapy.Field(serializer=int)
+    is_business_account = scrapy.Field()
+    is_joined_recently = scrapy.Field()
+    business_category_name = scrapy.Field()
+    is_private = scrapy.Field()
+    is_verified = scrapy.Field()
+    profile_pic_url = scrapy.Field()
+    profile_pic_url_hd = scrapy.Field()
+    username = scrapy.Field()
+    connected_fb_page = scrapy.Field()
+    latest_posts = scrapy.Field()
+    retrieved_at_time = scrapy.Field()
+    user_json = scrapy.Field()

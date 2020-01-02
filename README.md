@@ -2,6 +2,22 @@
 InstaScrapy as an Instagram (IG) scraper that fetches structured IG data. The goal of this project is to support
 IG reasearch.
 
+## Definitions
+### Spiders
+### Selectors
+### Items
+Standardized containers for IG Users, Posts and Locations which can be populated by scraped data. They can be accessed 
+directly like a python dict() element or via loader.
+
+Instascrapy uses the item loader function to standardize input and output data. E.g. the user ID is always numeric
+and within the JSON data as string variable. This is changed to an integer with input item loader.
+
+### Item loaders
+Items include input and output data cleansing that is standardized over all output pipelines (e.g. MongoDB, Redis,...). 
+An example is the original JSON string that is reduced with unecessary details to reduce space (e.g. empty values)
+
+### Item pipelines
+
 ## Infrastructure
 - spiders, settings.py, pipelines.py, middlewares.py, items.py are standard files from scrapy. They have been modified
 to fit to the actual use case

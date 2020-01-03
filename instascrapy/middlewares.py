@@ -98,5 +98,3 @@ class InstascrapyDownloaderMiddleware(object):
         # - return a Response object: stops process_exception() chain
         # - return a Request object: stops process_exception() chain
         pass
-
-    # Todo: Implement picture downloader

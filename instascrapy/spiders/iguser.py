@@ -46,7 +46,6 @@ class IguserSpider(scrapy.Spider):
 
         ig_user.add_value('edge_followed_by_count', user['edge_followed_by']['count'])
         ig_user.add_value('edge_follow_count', user['edge_follow']['count'])
-        # TODO: Adde latest posts to seperate Post Item or handle it differently
         ig_user.add_value('last_posts', [post['node']['shortcode'] for post in
                                          user['edge_owner_to_timeline_media']['edges']])
         ig_user.add_value('user_json', user)

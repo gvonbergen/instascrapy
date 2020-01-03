@@ -18,6 +18,21 @@ An example is the original JSON string that is reduced with unecessary details t
 
 ### Item pipelines
 
+## Business logic
+### Meta element (secondary key = category (e.g. POST, USER,...))
+
+### Newly discovered items (secondary key includes type, "ADDE" and version (e.g. PO#ADDE#V1# for a new post))
+
+### Retrieved items (secondary key includes type, "RETR" and version)
+
+### Processed items (seconary key includes type, "EXTR" and version)
+
+### Enriched items (secondary key includes type, "ENRI" and version)
+
+### Deleted items (secondary key includes type, "DELE" and version)
+
+### Updated items (secondary key includes type, "UPDA", version and timestamp (e.g. PO#UPDA#V1#2019-08-25T10:23:52))
+
 ## Infrastructure
 - spiders, settings.py, pipelines.py, middlewares.py, items.py are standard files from scrapy. They have been modified
 to fit to the actual use case

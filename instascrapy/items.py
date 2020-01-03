@@ -10,7 +10,7 @@ from typing import Any, List, Dict
 
 import scrapy
 import scrapy.loader
-from scrapy.loader.processors import TakeFirst, Compose
+from scrapy.loader.processors import TakeFirst, Compose, Identity
 
 from instascrapy.settings import REMOVAL_JSON_USER_FIELDS
 
@@ -89,6 +89,6 @@ class IGUser(scrapy.Item):
     profile_pic_url_hd = scrapy.Field()
     username = scrapy.Field()
     connected_fb_page = scrapy.Field()
-    latest_posts = scrapy.Field()
+    last_posts = scrapy.Field(output_processor=Identity())
     retrieved_at_time = scrapy.Field()
     user_json = scrapy.Field()

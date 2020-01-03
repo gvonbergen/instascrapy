@@ -24,7 +24,11 @@ class DynDB:
             IndexName=index,
             KeyConditionExpression='sk = :user',
             ExpressionAttributeValues={
-                ':user': serialize('USER')
+                ':user': serialize('USER'),
+            },
+            FilterExpression='attribute_not_exists(deleted)',
+            PaginationConfig={
+                'MaxItems': 50
             }
         )
 

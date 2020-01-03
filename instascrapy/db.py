@@ -26,10 +26,7 @@ class DynDB:
             ExpressionAttributeValues={
                 ':user': serialize('USER'),
             },
-            FilterExpression='attribute_not_exists(deleted)',
-            PaginationConfig={
-                'MaxItems': 50
-            }
+            FilterExpression='attribute_not_exists(deleted)'
         )
 
         for page in response:

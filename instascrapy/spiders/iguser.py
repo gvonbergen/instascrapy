@@ -22,7 +22,6 @@ class IguserSpider(scrapy.Spider):
 
     def start_requests(self):
         proxy_list = get_proxies()
-        # Todo: exclude those users which are deleted
         all_users = self.db.get_all_users('GSI1')
         for user in all_users:
             url = 'https://www.instagram.com/{}/'.format(user)

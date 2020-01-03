@@ -99,5 +99,4 @@ class InstascrapyDownloaderMiddleware(object):
         # - return a Request object: stops process_exception() chain
         pass
 
-    def spider_opened(self, spider):
-        spider.logger.info('Spider opened: %s' % spider.name)
+    # Todo: Implement picture downloader

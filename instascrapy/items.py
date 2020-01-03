@@ -50,14 +50,6 @@ def dict_remove_values(values, blacklist=None):
     return values_copy
 
 
-def remove_key_values(values, removal_list):
-    output = {}
-    for key, value in values.items():
-        if key not in removal_list:
-            output[key] = value
-    return output
-
-
 def remove_user_key_values(values):
     blacklist = REMOVAL_JSON_USER_FIELDS
     return dict_remove_values(values, blacklist)

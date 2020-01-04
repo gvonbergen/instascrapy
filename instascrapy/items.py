@@ -12,7 +12,7 @@ import scrapy
 import scrapy.loader
 from scrapy.loader.processors import TakeFirst, Compose, Identity
 
-from instascrapy.settings import REMOVAL_JSON_USER_FIELDS
+from instascrapy.settings import REMOVAL_JSON_USER_FIELDS, REMOVAL_JSON_POST_FIELDS
 
 
 def list_remove_empty_values(values, blacklist=None):
@@ -55,12 +55,18 @@ def remove_user_key_values(values):
     return dict_remove_values(values, blacklist)
 
 
+def remove_post_key_values(values):
+    blacklist = REMOVAL_JSON_POST_FIELDS
+    return dict_remove_values(values, blacklist)
+
 class IGLoader(scrapy.loader.ItemLoader):
     default_output_processor = TakeFirst()
 
     user_json_out = Compose(TakeFirst(),
                             remove_user_key_values)
 
+    post_json_out = Compose(TakeFirst(),
+                            remove_post_key_values)
 
 class IGUser(scrapy.Item):
     biography = scrapy.Field()
@@ -84,3 +90,32 @@ class IGUser(scrapy.Item):
     last_posts = scrapy.Field(output_processor=Identity())
     retrieved_at_time = scrapy.Field()
     user_json = scrapy.Field()
+
+class IGPost(scrapy.Item):
+    id = scrapy.Field()
+    shortcode = scrapy.Field()
+    dimensions = scrapy.Field()
+    media_preview = scrapy.Field()
+    display_url = scrapy.Field()
+    display_resources = scrapy.Field()
+    accessibility_caption = scrapy.Field()
+    is_video = scrapy.Field()
+    tracking_token = scrapy.Field()
+    edge_media_to_tagged_user = scrapy.Field()
+    edge_media_to_caption = scrapy.Field()
+    caption_is_edited = scrapy.Field()
+    has_ranked_comments = scrapy.Field()
+    edge_media_to_parent_comment = scrapy.Field()
+    edge_media_preview_comment = scrapy.Field()
+    comments_disabled = scrapy.Field()
+    taken_at_timestamp = scrapy.Field()
+    edge_media_preview_like = scrapy.Field()
+    edge_media_sponsor_user = scrapy.Field()
+    location = scrapy.Field()
+    owner = scrapy.Field()
+    is_ad = scrapy.Field()
+    edge_web_media_to_related_media = scrapy.Field()
+    retrieved_at_time = scrapy.Field()
+    post_json = scrapy.Field()
+    image_urls = scrapy.Field(output_processor=Identity())
+    images = scrapy.Field()

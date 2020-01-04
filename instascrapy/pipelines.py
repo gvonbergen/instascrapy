@@ -15,7 +15,7 @@ from scrapy.exporters import BaseItemExporter
 
 from instascrapy.items import IGUser
 from instascrapy.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, DYNAMODB_PIPELINE_REGION_NAME, \
-    DYNAMODB_PIPELINE_TABLE_NAME, DYNAMODB_EXPORTER_IGUSER_FIELDS
+    DYNAMODB_PIPELINE_TABLE_NAME, DYNAMODB_EXPORTER_IGUSER_FIELDS, DYNAMODB_PIPELINE_ENDPOINT_URL
 
 serialize = TypeSerializer().serialize
 
@@ -27,12 +27,13 @@ class InstascrapyPipeline(object):
 
 class DynamoDBExporter(BaseItemExporter):
 
-    def __init__(self, aws_access_key_id, aws_secret_access_key, region_name, table_name, **kwargs):
+    def __init__(self, aws_access_key_id, aws_secret_access_key, region_name, table_name, endpoint_url=None, **kwargs):
         super().__init__(**kwargs)
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
         self.region_name = region_name
         self.table_name = table_name
+        self.endpoint_url = endpoint_url
         self.encoder = serialize
         self.logger = logging.getLogger(__name__)
         self.table = None
@@ -43,7 +44,7 @@ class DynamoDBExporter(BaseItemExporter):
             aws_secret_access_key=self.aws_secret_access_key,
             region_name=self.region_name,
         )
-        self.client = session.client('dynamodb')
+        self.client = session.client('dynamodb', endpoint_url=self.endpoint_url)
 
     def finish_exporting(self):
         self.client = None
@@ -124,7 +125,8 @@ class DynamoDbPipeline(object):
         self.exporter = DynamoDBExporter(AWS_ACCESS_KEY_ID,
                                          AWS_SECRET_ACCESS_KEY,
                                          DYNAMODB_PIPELINE_REGION_NAME,
-                                         DYNAMODB_PIPELINE_TABLE_NAME)
+                                         DYNAMODB_PIPELINE_TABLE_NAME,
+                                         endpoint_url=DYNAMODB_PIPELINE_ENDPOINT_URL)
         self.exporter.start_exporting()
 
     def close_spider(self, spider):

@@ -13,9 +13,15 @@ from botocore.errorfactory import ClientError
 from scrapy import signals
 from scrapy.exporters import BaseItemExporter
 
-from instascrapy.items import IGUser
+from instascrapy.items import IGUser, IGPost
 from instascrapy.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, DYNAMODB_PIPELINE_REGION_NAME, \
-    DYNAMODB_PIPELINE_TABLE_NAME, DYNAMODB_EXPORTER_IGUSER_FIELDS, DYNAMODB_PIPELINE_ENDPOINT_URL
+    DYNAMODB_PIPELINE_TABLE_NAME, DYNAMODB_EXPORTER_IGUSER_FIELDS, \
+    DYNAMODB_EXPORTER_IGPOST_FIELDS
+
+try:
+    from instascrapy.settings import DYNAMODB_PIPELINE_ENDPOINT_URL
+except:
+    DYNAMODB_PIPELINE_ENDPOINT_URL = None
 
 serialize = TypeSerializer().serialize
 
@@ -67,10 +73,10 @@ class DynamoDBExporter(BaseItemExporter):
     def export_item(self, item):
         serialized_item = dict(self._get_serialized_fields(item))
         additional_fields = {}
-        for field in DYNAMODB_EXPORTER_IGUSER_FIELDS:
-            additional_fields[field] = self.encoder(serialized_item[field])
+        actual_time = {'retrieved_at_time': serialized_item['retrieved_at_time']}
         if isinstance(item, IGUser):
-            actual_time = {'retrieved_at_time': serialized_item['retrieved_at_time']}
+            for field in DYNAMODB_EXPORTER_IGUSER_FIELDS:
+                additional_fields[field] = self.encoder(serialized_item[field])
             # Upload user detail updates
             self.client.put_item(
                 TableName=self.table_name,
@@ -115,6 +121,37 @@ class DynamoDBExporter(BaseItemExporter):
                     pass
             except KeyError:
                 self.logger.debug('User %s has no posts', serialized_item['username'])
+        if isinstance(item, IGPost):
+            for field in DYNAMODB_EXPORTER_IGPOST_FIELDS:
+                try:
+                    additional_fields[field] = self.encoder(serialized_item[field])
+                except KeyError:
+                    pass
+            # Upload post detail updates
+            self.client.put_item(
+                TableName=self.table_name,
+                Item={
+                    'pk': self.encoder('PO#{}'.format(serialized_item['shortcode'])),
+                    'sk': self.encoder('US#UPDA#V1#{}'.format(time.strftime("%Y-%m-%dT%H:%M:%S",
+                                                                            time.localtime(actual_time \
+                                                                                               ['retrieved_at_time'])))),
+                    'json': self.encoder(serialized_item['post_json']),
+                    **additional_fields
+                }
+            )
+            # Update main element that there is an update available
+            self.client.update_item(
+                TableName=self.table_name,
+                Key={
+                    'pk': self.encoder('PO#{}'.format(serialized_item['shortcode'])),
+                    'sk': self.encoder('POST'),
+                },
+                UpdateExpression='SET retrieved_at_time = :retrieved_at_time',
+                ExpressionAttributeValues={
+                    ':retrieved_at_time': self.encoder(actual_time['retrieved_at_time'])
+                }
+            )
+
         else:
             pass
 

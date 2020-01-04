@@ -10,25 +10,22 @@ from twisted.internet.error import DNSLookupError, TCPTimedOutError
 from instascrapy.db import DynDB
 from instascrapy.helpers import get_proxies, read_post_shortcodes
 from instascrapy.items import IGUser, IGLoader
+from instascrapy.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 
 
 class IguserSpider(scrapy.Spider):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.db = DynDB(table='instalytics_dev', region_name='eu-central-1')
+        self.db = DynDB(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, table='instalytics_dev', region_name='eu-central-1')
 
     name = 'iguser'
 
     def start_requests(self):
-        proxy_list = get_proxies()
-        all_users = self.db.get_all_users('GSI1')
+        all_users = self.db.get_category_all('USER', 'GSI1')
         for user in all_users:
             url = 'https://www.instagram.com/{}/'.format(user)
-            header_proxy = random.choice(proxy_list)
-            yield scrapy.Request(url=url, callback=self.parse, errback=self.errback,
-                                 headers={'User-Agent': header_proxy[1]},
-                                 meta={"proxy": header_proxy[0]})
+            yield scrapy.Request(url=url, callback=self.parse, errback=self.errback, dont_filter=True)
 
     def parse(self, response):
         json_object = json.loads(response.xpath('//script[@type="text/javascript"]')\

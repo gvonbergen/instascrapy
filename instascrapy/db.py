@@ -9,22 +9,25 @@ serialize = TypeSerializer().serialize
 
 class DynDB:
     def __init__(self,
-                 table=None,
-                 region_name=None
-                 ):
+                 aws_access_key_id,
+                 aws_secret_access_key,
+                 table,
+                 region_name):
         self.table = table
-        self.region = region_name
         self.logger = logging.getLogger(__name__)
-        self._client = boto3.client('dynamodb', region_name=self.region)
+        self._client = boto3.client('dynamodb',
+                                    aws_access_key_id=aws_access_key_id,
+                                    aws_secret_access_key=aws_secret_access_key,
+                                    region_name=region_name)
 
-    def get_all_users(self, index):
+    def get_category_all(self, category, index):
         paginator = self._client.get_paginator('query')
         response = paginator.paginate(
             TableName=self.table,
             IndexName=index,
-            KeyConditionExpression='sk = :user',
+            KeyConditionExpression='sk = :category',
             ExpressionAttributeValues={
-                ':user': serialize('USER'),
+                ':category': serialize(category),
             },
             FilterExpression='attribute_not_exists(deleted)'
         )

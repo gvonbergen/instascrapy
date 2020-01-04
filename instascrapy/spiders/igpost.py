@@ -21,7 +21,7 @@ class IgpostSpider(scrapy.Spider):
 
     def start_requests(self):
         all_posts = self.db.get_category_all('POST', 'GSI1')
-        all_posts = ['-L2WwkSDeq']
+        # all_posts = ['-L2WwkSDeq']
         for post in all_posts:
             url = 'https://www.instagram.com/p/{}'.format(post)
             yield scrapy.Request(url=url, callback=self.parse, errback=self.errback, dont_filter=True)
@@ -32,12 +32,21 @@ class IgpostSpider(scrapy.Spider):
         post = json_object['entry_data']['PostPage'][0]['graphql']['shortcode_media']
 
         ig_post = IGLoader(item=IGPost(), response=response)
-        keys = ig_post.item.fields.keys()
+        keys = list(ig_post.item.fields.keys())
+        keys_to_delete = ['owner', 'retrieved_at_time', 'image_urls', 'images']
+        for k in keys_to_delete:
+            keys.remove(k)
         for k in keys:
             try:
                 ig_post.add_value(k, post[k])
             except KeyError:
                 pass
+        ig_post.add_value('owner', post['owner']['username'])
+        ig_post.add_value('owner_id', post['owner']['id'])
+        try:
+            ig_post.add_value('location_id', post['location']['id'])
+        except TypeError:
+            pass
         ig_post.add_value('post_json', post)
         ig_post.add_value('retrieved_at_time', int(time.time()))
         ig_post.add_value('image_urls', post.get('display_url'))
@@ -59,3 +68,4 @@ class IgpostSpider(scrapy.Spider):
             if response.status == 404:
                 # username = response.url.split('/')[-2:-1][0]
                 # self.db.set_entity_deleted(username)
+                pass

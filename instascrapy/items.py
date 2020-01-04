@@ -12,7 +12,7 @@ import scrapy
 import scrapy.loader
 from scrapy.loader.processors import TakeFirst, Compose, Identity
 
-from instascrapy.settings import REMOVAL_JSON_USER_FIELDS, REMOVAL_JSON_POST_FIELDS
+from instascrapy.settings import REMOVAL_JSON_USER_FIELDS, REMOVAL_JSON_POST_FIELDS, REMOVAL_JSON_LOCATION_FIELDS
 
 
 def list_remove_empty_values(values, blacklist=None):
@@ -59,6 +59,11 @@ def remove_post_key_values(values):
     blacklist = REMOVAL_JSON_POST_FIELDS
     return dict_remove_values(values, blacklist)
 
+
+def remove_location_key_values(values):
+    blacklist = REMOVAL_JSON_LOCATION_FIELDS
+    return dict_remove_values(values, blacklist)
+
 class IGLoader(scrapy.loader.ItemLoader):
     default_output_processor = TakeFirst()
 
@@ -67,6 +72,9 @@ class IGLoader(scrapy.loader.ItemLoader):
 
     post_json_out = Compose(TakeFirst(),
                             remove_post_key_values)
+
+    location_json_out = Compose(TakeFirst(),
+                                remove_location_key_values)
 
 class IGUser(scrapy.Item):
     biography = scrapy.Field()
@@ -90,6 +98,7 @@ class IGUser(scrapy.Item):
     last_posts = scrapy.Field(output_processor=Identity())
     retrieved_at_time = scrapy.Field()
     user_json = scrapy.Field()
+
 
 class IGPost(scrapy.Item):
     id = scrapy.Field()
@@ -121,3 +130,24 @@ class IGPost(scrapy.Item):
     post_json = scrapy.Field()
     image_urls = scrapy.Field(output_processor=Identity())
     images = scrapy.Field()
+
+
+class IGLocation(scrapy.Item):
+    id = scrapy.Field()
+    name = scrapy.Field()
+    has_public_page = scrapy.Field()
+    lat = scrapy.Field()
+    lng = scrapy.Field()
+    slug = scrapy.Field()
+    blurb = scrapy.Field()
+    website = scrapy.Field()
+    phone = scrapy.Field()
+    primary_alias_on_fb = scrapy.Field()
+    profile_pic_url = scrapy.Field()
+    edge_location_to_media = scrapy.Field()
+    edge_location_to_media_count = scrapy.Field()
+    edge_location_to_top_posts = scrapy.Field()
+    directory = scrapy.Field()
+    retrieved_at_time = scrapy.Field()
+    location_json = scrapy.Field()
+    last_posts = scrapy.Field(output_processor=Identity())

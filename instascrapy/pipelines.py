@@ -13,10 +13,10 @@ from botocore.errorfactory import ClientError
 from scrapy import signals
 from scrapy.exporters import BaseItemExporter
 
-from instascrapy.items import IGUser, IGPost
+from instascrapy.items import IGUser, IGPost, IGLocation
 from instascrapy.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, DYNAMODB_PIPELINE_REGION_NAME, \
     DYNAMODB_PIPELINE_TABLE_NAME, DYNAMODB_EXPORTER_IGUSER_FIELDS, \
-    DYNAMODB_EXPORTER_IGPOST_FIELDS
+    DYNAMODB_EXPORTER_IGPOST_FIELDS, DYNAMODB_EXPORTER_IGLOCATION_FIELDS
 
 try:
     from instascrapy.settings import DYNAMODB_PIPELINE_ENDPOINT_URL
@@ -132,7 +132,7 @@ class DynamoDBExporter(BaseItemExporter):
                 TableName=self.table_name,
                 Item={
                     'pk': self.encoder('PO#{}'.format(serialized_item['shortcode'])),
-                    'sk': self.encoder('US#UPDA#V1#{}'.format(time.strftime("%Y-%m-%dT%H:%M:%S",
+                    'sk': self.encoder('PO#UPDA#V1#{}'.format(time.strftime("%Y-%m-%dT%H:%M:%S",
                                                                             time.localtime(actual_time \
                                                                                                ['retrieved_at_time'])))),
                     'json': self.encoder(serialized_item['post_json']),
@@ -151,7 +151,36 @@ class DynamoDBExporter(BaseItemExporter):
                     ':retrieved_at_time': self.encoder(actual_time['retrieved_at_time'])
                 }
             )
-
+        if isinstance(item, IGLocation):
+            for field in DYNAMODB_EXPORTER_IGLOCATION_FIELDS:
+                try:
+                    additional_fields[field] = self.encoder(serialized_item[field])
+                except KeyError:
+                    pass
+            # Upload post detail updates
+            self.client.put_item(
+                TableName=self.table_name,
+                Item={
+                    'pk': self.encoder('LO#{}'.format(serialized_item['id'])),
+                    'sk': self.encoder('LO#UPDA#V1#{}'.format(time.strftime("%Y-%m-%dT%H:%M:%S",
+                                                                            time.localtime(actual_time \
+                                                                                               ['retrieved_at_time'])))),
+                    'json': self.encoder(serialized_item['location_json']),
+                    **additional_fields
+                }
+            )
+            # Update main element that there is an update available
+            self.client.update_item(
+                TableName=self.table_name,
+                Key={
+                    'pk': self.encoder('LO#{}'.format(serialized_item['id'])),
+                    'sk': self.encoder('LOCATION'),
+                },
+                UpdateExpression='SET retrieved_at_time = :retrieved_at_time',
+                ExpressionAttributeValues={
+                    ':retrieved_at_time': self.encoder(actual_time['retrieved_at_time'])
+                }
+            )
         else:
             pass
 

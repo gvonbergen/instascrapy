@@ -3,16 +3,22 @@ import json
 import time
 
 import scrapy
+from scrapy.spidermiddlewares.httperror import HttpError
 
+from instascrapy.db import DynDB
 from instascrapy.items import IGLoader, IGLocation
+from instascrapy.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 
 
 class IglocationSpider(scrapy.Spider):
     name = 'iglocation'
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.db = DynDB(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, table='instalytics_dev', region_name='eu-central-1')
 
     def start_requests(self):
-        all_locations = ['1014315929']
+        all_locations = ['1011353671']
         for location in all_locations:
             url = 'https://www.instagram.com/explore/locations/{}/'.format(location)
             yield scrapy.Request(url=url, callback=self.parse, errback=self.errback, dont_filter=True)
@@ -39,4 +45,13 @@ class IglocationSpider(scrapy.Spider):
         yield ig_location.load_item()
 
     def errback(self, failure):
-        pass
+        self.logger.debug(repr(failure))
+
+        if failure.check(HttpError):
+            response = failure.value.response
+            if response.status == 404:
+                location = response.url.split('/')[-2:-1][0]
+                self.db.set_entity_deleted('LOCATION', location)
+            else:
+                request = failure.request
+                self.logger.debug('Error on %s', request.url)

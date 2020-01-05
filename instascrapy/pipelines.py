@@ -82,7 +82,7 @@ class DynamoDBExporter(BaseItemExporter):
                 TableName=self.table_name,
                 Item={
                     'pk': self.encoder('US#{}'.format(serialized_item['username'])),
-                    'sk': self.encoder('US#UPDA#V1#{}'.format(time.strftime("%Y-%m-%dT%H:%M:%S",
+                    'sk': self.encoder('US#UPDA#V2#{}'.format(time.strftime("%Y-%m-%dT%H:%M:%S",
                                                                             time.localtime(actual_time\
                                                                                                ['retrieved_at_time'])))),
                     'json': self.encoder(serialized_item['user_json']),
@@ -132,7 +132,7 @@ class DynamoDBExporter(BaseItemExporter):
                 TableName=self.table_name,
                 Item={
                     'pk': self.encoder('PO#{}'.format(serialized_item['shortcode'])),
-                    'sk': self.encoder('PO#UPDA#V1#{}'.format(time.strftime("%Y-%m-%dT%H:%M:%S",
+                    'sk': self.encoder('PO#UPDA#V2#{}'.format(time.strftime("%Y-%m-%dT%H:%M:%S",
                                                                             time.localtime(actual_time \
                                                                                                ['retrieved_at_time'])))),
                     'json': self.encoder(serialized_item['post_json']),
@@ -162,7 +162,7 @@ class DynamoDBExporter(BaseItemExporter):
                 TableName=self.table_name,
                 Item={
                     'pk': self.encoder('LO#{}'.format(serialized_item['id'])),
-                    'sk': self.encoder('LO#UPDA#V1#{}'.format(time.strftime("%Y-%m-%dT%H:%M:%S",
+                    'sk': self.encoder('LO#UPDA#V2#{}'.format(time.strftime("%Y-%m-%dT%H:%M:%S",
                                                                             time.localtime(actual_time \
                                                                                                ['retrieved_at_time'])))),
                     'json': self.encoder(serialized_item['location_json']),

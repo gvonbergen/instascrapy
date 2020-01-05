@@ -21,7 +21,7 @@ class IgpostSpider(scrapy.Spider):
 
     def start_requests(self):
         all_posts = self.db.get_category_all('POST', 'GSI1')
-        # all_posts = ['-L2WwkSDeq']
+        all_posts = ['2-L2WwkSDeq']
         for post in all_posts:
             url = 'https://www.instagram.com/p/{}'.format(post)
             yield scrapy.Request(url=url, callback=self.parse, errback=self.errback, dont_filter=True)
@@ -54,18 +54,13 @@ class IgpostSpider(scrapy.Spider):
         yield ig_post.load_item()
 
     def errback(self, failure):
-        # log all failures
         self.logger.debug(repr(failure))
 
-        # in case you want to do something special for some errors,
-        # you may need the failure's type:
-
         if failure.check(HttpError):
-            # these exceptions come from HttpError spider middleware
-            # you can get the non-200 response
             response = failure.value.response
-            self.logger.debug('HttpError on %s', response.url)
             if response.status == 404:
-                # username = response.url.split('/')[-2:-1][0]
-                # self.db.set_entity_deleted(username)
-                pass
+                post = response.url.split('/')[-2:-1][0]
+                self.db.set_entity_deleted('POST', post)
+            else:
+                request = failure.request
+                self.logger.debug('Error on %s', request.url)

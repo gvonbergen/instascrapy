@@ -4,8 +4,24 @@ import logging
 import boto3
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 
+
+_PREFIXES = {
+    'POST': {
+        'pk': 'PO#',
+    },
+    'USER':{
+        'pk': 'US#'
+    },
+    'LOCATION':{
+        'pk': 'LO#'
+    }
+}
+
+
 deserializer = TypeDeserializer().deserialize
 serialize = TypeSerializer().serialize
+
+
 
 class DynDB:
     def __init__(self,
@@ -36,14 +52,17 @@ class DynDB:
             for item in page['Items']:
                 yield {k: deserializer(v) for k, v in item.items()}.get('pk')[3:]
 
-    def set_entity_deleted(self, entity):
+    def set_entity_deleted(self, category: str, entity: str) -> None:
         response = self._client.update_item(
             TableName=self.table,
-            Key={'pk': serialize('US#' + entity),
-                 'sk': serialize('USER')},
+            Key={'pk': serialize(_PREFIXES[category]['pk'] + entity),
+                 'sk': serialize(category)},
             UpdateExpression='SET deleted=:deleted',
             ExpressionAttributeValues={
-                ':deleted': serialize(True)
+                ':deleted': {'BOOL': True}
             }
         )
+        #Todo: Add storage statistics to scrapy logger
         self.logger.debug('Entity %s deleted', entity)
+
+

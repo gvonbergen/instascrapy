@@ -14,12 +14,11 @@ from instascrapy.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 
 
 class IguserSpider(scrapy.Spider):
+    name = 'iguser'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.db = DynDB(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, table='instalytics_dev', region_name='eu-central-1')
-
-    name = 'iguser'
 
     def start_requests(self):
         all_users = self.db.get_category_all('USER', 'GSI1')
@@ -66,7 +65,7 @@ class IguserSpider(scrapy.Spider):
             self.logger.debug('HttpError on %s', response.url)
             if response.status == 404:
                 username = response.url.split('/')[-2:-1][0]
-                self.db.set_entity_deleted(username)
+                self.db.set_entity_deleted('USER', username)
 
         elif failure.check(DNSLookupError):
             # this is the original request

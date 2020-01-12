@@ -28,10 +28,12 @@ class DynDB:
                  aws_access_key_id,
                  aws_secret_access_key,
                  region_name,
-                 table):
+                 table,
+                 endpoint_url=None):
         self.table = table
         self.logger = logging.getLogger(__name__)
         self._client = boto3.client('dynamodb',
+                                    endpoint_url=endpoint_url,
                                     aws_access_key_id=aws_access_key_id,
                                     aws_secret_access_key=aws_secret_access_key,
                                     region_name=region_name)

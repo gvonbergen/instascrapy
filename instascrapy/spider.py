@@ -19,6 +19,7 @@ class DynDBSpider(Spider):
             'aws_secret_access_key': crawler.settings.get('AWS_SECRET_ACCESS_KEY'),
             'region_name': crawler.settings.get('AWS_DYNAMODB_REGION_NAME'),
             'table': crawler.settings.get('AWS_DYNAMODB_TABLE_NAME'),
+            'endpoint_url': crawler.settings.get('AWS_DYNAMODB_ENDPOINT_URL', None)
         }
         if not dynamodb_settings['aws_access_key_id'] or not dynamodb_settings['aws_secret_access_key']:
             raise ValueError('AWS Credentials are missing')
@@ -31,7 +32,8 @@ class DynDBSpider(Spider):
             aws_access_key_id=dynamodb_settings['aws_access_key_id'],
             aws_secret_access_key=dynamodb_settings['aws_secret_access_key'],
             region_name=dynamodb_settings['region_name'],
-            table=dynamodb_settings['table']
+            table=dynamodb_settings['table'],
+            endpoint_url=dynamodb_settings['endpoint_url']
         )
         self.crawler = crawler
         self.settings = crawler.settings

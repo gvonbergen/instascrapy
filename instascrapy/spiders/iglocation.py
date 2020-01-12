@@ -5,17 +5,11 @@ import time
 import scrapy
 from scrapy.spidermiddlewares.httperror import HttpError
 
-from instascrapy.db import DynDB
 from instascrapy.items import IGLoader, IGLocation
-from instascrapy.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 
 
 class IglocationSpider(scrapy.Spider):
     name = 'iglocation'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.db = DynDB(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, table='instalytics_dev', region_name='eu-central-1')
 
     def start_requests(self):
         all_locations = ['1011353671']

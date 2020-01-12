@@ -7,18 +7,11 @@ import scrapy
 from scrapy.spidermiddlewares.httperror import HttpError
 from twisted.internet.error import DNSLookupError, TCPTimedOutError
 
-from instascrapy.db import DynDB
-from instascrapy.helpers import get_proxies, read_post_shortcodes
 from instascrapy.items import IGUser, IGLoader
-from instascrapy.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 
 
 class IguserSpider(scrapy.Spider):
     name = 'iguser'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.db = DynDB(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, table='instalytics_dev', region_name='eu-central-1')
 
     def start_requests(self):
         all_users = self.db.get_category_all('USER', 'GSI1')

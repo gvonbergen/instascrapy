@@ -27,8 +27,8 @@ class DynDB:
     def __init__(self,
                  aws_access_key_id,
                  aws_secret_access_key,
-                 table,
-                 region_name):
+                 region_name,
+                 table):
         self.table = table
         self.logger = logging.getLogger(__name__)
         self._client = boto3.client('dynamodb',

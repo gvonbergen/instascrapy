@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 import json
-import random
 import time
 
 import scrapy
 from scrapy.spidermiddlewares.httperror import HttpError
-from twisted.internet.error import DNSLookupError, TCPTimedOutError
 
 from instascrapy.items import IGUser, IGLoader
+from instascrapy.spider import DynDBSpider
 
 
-class IguserSpider(scrapy.Spider):
+class IguserSpider(DynDBSpider):
     name = 'iguser'
 
     def start_requests(self):

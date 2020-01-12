@@ -6,9 +6,10 @@ import scrapy
 from scrapy.spidermiddlewares.httperror import HttpError
 
 from instascrapy.items import IGLoader, IGLocation
+from instascrapy.spider import DynDBSpider
 
 
-class IglocationSpider(scrapy.Spider):
+class IglocationSpider(DynDBSpider):
     name = 'iglocation'
 
     def start_requests(self):

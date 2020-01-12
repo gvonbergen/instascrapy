@@ -45,11 +45,7 @@ class IguserSpider(scrapy.Spider):
         # TODO: Follow Weblink an index further details
 
     def errback(self, failure):
-        # log all failures
         self.logger.debug(repr(failure))
-
-        # in case you want to do something special for some errors,
-        # you may need the failure's type:
 
         if failure.check(HttpError):
             # these exceptions come from HttpError spider middleware
@@ -59,12 +55,3 @@ class IguserSpider(scrapy.Spider):
             if response.status == 404:
                 username = response.url.split('/')[-2:-1][0]
                 self.db.set_entity_deleted('USER', username)
-
-        elif failure.check(DNSLookupError):
-            # this is the original request
-            request = failure.request
-            self.logger.debug('DNSLookupError on %s', request.url)
-
-        elif failure.check(TimeoutError, TCPTimedOutError):
-            request = failure.request
-            self.logger.debug('TimeoutError on %s', request.url)

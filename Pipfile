@@ -14,6 +14,7 @@ scrapy = "==1.8.0"
 scrapy-rotating-proxies = "==0.6.2"
 pillow = "==7.0.0"
 awscli-local = "==0.5"
+txmongo = "==19.2"
 
 [requires]
 python_version = "3.6"

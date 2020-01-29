@@ -8,10 +8,15 @@ import logging
 import time
 
 import boto3
+import txmongo
 from boto3.dynamodb.types import TypeSerializer
 from botocore.errorfactory import ClientError
+from pymongo.errors import DuplicateKeyError, BulkWriteError
 from scrapy import signals
 from scrapy.exporters import BaseItemExporter
+from twisted.internet.defer import inlineCallbacks
+from txmongo.connection import ConnectionPool
+from bson.codec_options import DEFAULT_CODEC_OPTIONS
 
 from instascrapy.items import IGUser, IGPost, IGLocation
 from instascrapy.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, DYNAMODB_PIPELINE_REGION_NAME, \
@@ -25,6 +30,8 @@ except:
 
 serialize = TypeSerializer().serialize
 
+
+log = logging.getLogger(__name__)
 
 class InstascrapyPipeline(object):
     def process_item(self, item, spider):
@@ -200,4 +207,81 @@ class DynamoDbPipeline(object):
 
     def process_item(self, item, spider):
         self.exporter.export_item(item)
+        return item
+
+
+def mongo_dict(item):
+    retrieved_at_time = item.get('retrieved_at_time')
+    retrieved_at_time_readable = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(retrieved_at_time))
+    db_entries = []
+    db_entry = {
+        'retrieved_at_time': retrieved_at_time
+    }
+    if isinstance(item, IGUser):
+        primary_key = 'US#{}'.format(item.get('username'))
+        secondary_key = 'USER'
+        db_entry.update({'pk': primary_key,
+                         'sk': 'US#UPDA#V1#{}'.format(retrieved_at_time_readable),
+                         'username': item.get('username'),
+                         'id': int(item.get('id')),
+                         'json': item.get('user_json')})
+        db_entries.append(db_entry)
+        for post in item.get('last_posts', []):
+            db_entries.append({
+                'pk': 'PO#{}'.format(post),
+                'sk': 'POST',
+                'discovered_at_time': retrieved_at_time
+            })
+
+    return primary_key, secondary_key, db_entries
+
+
+
+class MongoDBPipeline(object):
+    def __init__(self, mongo_uri, mongo_db, mongo_collection, mongo_user, mongo_password):
+        self.mongo_uri = mongo_uri
+        self.mongo_db = mongo_db
+        self.mongo_collection = mongo_collection
+        self.mongo_user = mongo_user
+        self.mongo_password = mongo_password
+        self.client = None
+        self.db = None
+        self.collection = None
+        self.codec_options = DEFAULT_CODEC_OPTIONS
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(
+            mongo_uri=crawler.settings.get('MONGO_URI', 'mongodb://127.0.0.1:27017'),
+            mongo_db=crawler.settings.get('MONGO_DB', 'instascrapy'),
+            mongo_collection=crawler.settings.get('MONGO_COLLECTION'),
+            mongo_user=crawler.settings.get('MONGO_USER'),
+            mongo_password=crawler.settings.get('MONGO_PASSWORD')
+        )
+
+    @inlineCallbacks
+    def open_spider(self, spider):
+        self.client = yield ConnectionPool(self.mongo_uri)
+        self.db = getattr(self.client, self.mongo_db)
+        yield self.db.authenticate(self.mongo_user, self.mongo_password)
+        self.collection = getattr(self.db, self.mongo_collection)
+
+    def close_spider(self, spider):
+        self.client.disconnect()
+
+    @inlineCallbacks
+    def process_item(self, item, spider):
+        primary_key, secondary_key, db_entries = mongo_dict(item)
+        try:
+            yield self.collection.insert_many(db_entries, ordered=False)
+        except BulkWriteError as e:
+            failed_items = ', '.join([x['keyValue']['pk'] for x in e.details['writeErrors']])
+            log.debug('Item(s) not written to DB: {}'.format(failed_items))
+        yield self.collection.update_one(
+            {'pk': primary_key, 'sk': secondary_key},
+            {'$set': {
+                'retrieved_at_time': item.get('retrieved_at_time')
+            }}
+        )
+
         return item

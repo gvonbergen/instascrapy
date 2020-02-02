@@ -226,6 +226,7 @@ def mongo_dict(item):
                          'id': int(item.get('id')),
                          'json': item.get('user_json')})
         db_entries.append(db_entry)
+        db_entries.append({'pk': primary_key, 'sk': secondary_key})
         for post in item.get('last_posts', []):
             db_entries.append({
                 'pk': 'PO#{}'.format(post),

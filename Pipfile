@@ -6,15 +6,14 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-boto3 = "==1.10.46"
 brotlipy = "==0.7.0"
 pytest = "*"
-txboto = "==0.1.3"
 scrapy = "==1.8.0"
 scrapy-rotating-proxies = "==0.6.2"
 pillow = "==7.0.0"
 awscli-local = "==0.5"
 txmongo = "==19.2"
+boto3 = "==1.11.9"
 
 [requires]
 python_version = "3.6"

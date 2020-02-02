@@ -14,6 +14,9 @@ pillow = "==7.0.0"
 awscli-local = "==0.5"
 txmongo = "==19.2"
 boto3 = "==1.11.9"
+requests-mock = "==1.7.0"
+requests = "==2.22.0"
+pytest-datadir = "==1.3.1"
 
 [requires]
 python_version = "3.6"

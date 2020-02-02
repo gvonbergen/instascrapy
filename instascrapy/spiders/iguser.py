@@ -5,6 +5,7 @@ import time
 import scrapy
 from scrapy.spidermiddlewares.httperror import HttpError
 
+from instascrapy.helpers import ig_extract_shared_data
 from instascrapy.items import IGUser, IGLoader
 from instascrapy.spider import DynDBSpider
 
@@ -19,29 +20,27 @@ class IguserSpider(DynDBSpider):
             yield scrapy.Request(url=url, callback=self.parse, errback=self.errback, dont_filter=True)
 
     def parse(self, response):
-        json_object = json.loads(response.xpath('//script[@type="text/javascript"]')\
-                                 .re('window._sharedData = (.+?);</script>')[0])
-        user = json_object['entry_data']['ProfilePage'][0]['graphql']['user']
+        def _parse_user(loader, data):
+            FIRST_LEVEL_ITEMS = ['biography', 'external_url', 'external_url_linkshimmed', 'full_name', 'has_channel',
+                                 'highlight_reel_count', 'id', 'is_business_account', 'is_joined_recently',
+                                 'business_category_name', 'is_private', 'is_verified', 'profile_pic_url',
+                                 'profile_pic_url_hd', 'username', 'connected_fb_page']
+            for entry in FIRST_LEVEL_ITEMS:
+                loader.add_value(entry, data.get(entry))
+            loader.add_value('edge_followed_by_count', data['edge_followed_by']['count'])
+            loader.add_value('edge_follow_count', data['edge_follow']['count'])
+            loader.add_value('last_posts', [post['node']['shortcode'] for post in
+                                             data['edge_owner_to_timeline_media']['edges']])
+            loader.add_value('user_json', data)
+            loader.add_value('retrieved_at_time', int(time.time()))
+            return loader
 
+        ig_user_dict = ig_extract_shared_data(response=response, category='user')
         ig_user = IGLoader(item=IGUser(), response=response)
-
-        first_level_items = ['biography', 'external_url', 'external_url_linkshimmed', 'full_name', 'has_channel',
-                             'highlight_reel_count', 'id', 'is_business_account', 'is_joined_recently',
-                             'business_category_name', 'is_private', 'is_verified', 'profile_pic_url',
-                             'profile_pic_url_hd', 'username', 'connected_fb_page']
-        for entry in first_level_items:
-            ig_user.add_value(entry, user.get(entry))
-
-        ig_user.add_value('edge_followed_by_count', user['edge_followed_by']['count'])
-        ig_user.add_value('edge_follow_count', user['edge_follow']['count'])
-        ig_user.add_value('last_posts', [post['node']['shortcode'] for post in
-                                         user['edge_owner_to_timeline_media']['edges']])
-        ig_user.add_value('user_json', user)
-        ig_user.add_value('retrieved_at_time', int(time.time()))
+        ig_user = _parse_user(ig_user, ig_user_dict)
 
         yield ig_user.load_item()
 
-        # TODO: Follow Weblink an index further details
 
     def errback(self, failure):
         self.logger.debug(repr(failure))

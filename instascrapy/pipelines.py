@@ -234,6 +234,10 @@ def mongo_dict(item):
                 'discovered_at_time': retrieved_at_time
             })
 
+    else:
+        primary_key = None
+        secondary_key = None
+
     return primary_key, secondary_key, db_entries
 
 

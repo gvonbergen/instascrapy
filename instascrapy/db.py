@@ -38,16 +38,20 @@ class DynDB:
                                     aws_secret_access_key=aws_secret_access_key,
                                     region_name=region_name)
 
-    def get_category_all(self, category, index):
-        paginator = self._client.get_paginator('query')
+    def get_category_all(self, category, index, startkey=None):
+        paginator = self._client.get_paginator('scan')
+        kw =  {}
+        if startkey:
+            kw['ExclusiveStartKey'] = {'sk': serialize('USER'), 'pk': serialize(startkey)}
         response = paginator.paginate(
             TableName=self.table,
             IndexName=index,
-            KeyConditionExpression='sk = :category',
+            FilterExpression='sk = :category',
             ExpressionAttributeValues={
                 ':category': serialize(category),
             },
-            FilterExpression='attribute_not_exists(deleted)'
+            **kw
+#            FilterExpression='attribute_not_exists(deleted)'
         )
 
         for page in response:

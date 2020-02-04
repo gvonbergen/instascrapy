@@ -1,9 +1,30 @@
 """ This file includes helper functions """
 import itertools
+import re
+import json
 import random
 from typing import List
 
 from instascrapy.settings import PROXY_LIST
+
+IG_JSON_LOCATION = re.compile('window._sharedData = (.+?);</script>')
+
+def ig_extract_shared_data(response, category=None) -> dict:
+    """
+    Function returns a dictionary with the entity information from Instagram
+    :param response: HTML response as string
+    :return: parsed entity meta data as dictionary or shared_data
+    """
+    shared_data = json.loads(IG_JSON_LOCATION.findall(response.text)[0])
+    if category == 'user':
+        return shared_data['entry_data']['ProfilePage'][0]['graphql']['user']
+    elif category == 'post':
+        return shared_data['entry_data']['PostPage'][0]['graphql']['shortcode_media']
+    elif category == 'location':
+        return shared_data['entry_data']['LocationsPage'][0]['graphql']['location']
+    else:
+        return shared_data
+
 
 def get_random_useragent():
     user_agents = [

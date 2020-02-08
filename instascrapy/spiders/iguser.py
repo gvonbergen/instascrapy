@@ -14,6 +14,10 @@ from instascrapy.spider import DynDBSpider
 class IguserSpider(DynDBSpider):
     name = 'iguser'
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.start_key = kwargs.get('start_key', None)
+
     @staticmethod
     def _parse_user(loader, data):
         FIRST_LEVEL_ITEMS = ['biography', 'external_url', 'external_url_linkshimmed', 'full_name', 'has_channel',

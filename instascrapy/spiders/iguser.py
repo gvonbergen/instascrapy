@@ -16,6 +16,7 @@ class IguserSpider(DynDBSpider):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.keys = kwargs.get('keys', None)
         self.start_key = kwargs.get('start_key', None)
 
     @staticmethod
@@ -35,10 +36,11 @@ class IguserSpider(DynDBSpider):
         return loader
 
     def start_requests(self):
-        all_users = self.db.get_category_all('USER', 'GSI1', startkey=self.start_key)
-        # with open('tmp/thefashionfraction_31-01-2019_full_410196.json', 'r') as f:
-        #     all_users = json.load(f)
-        all_users = ['enelym1978', 'fabbostar_official', 'swissglam', 'emilien.marchello']
+        if self.keys:
+            all_users = self.keys.split(',')
+        else:
+            all_users = self.db.get_category_all('USER', 'GSI1', startkey=self.start_key)
+
         for user in all_users:
             url = 'https://www.instagram.com/{}/'.format(user)
             yield scrapy.Request(url=url, callback=self.parse, errback=self.errback, dont_filter=True)

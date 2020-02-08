@@ -3,6 +3,7 @@ import json
 import time
 
 import scrapy
+from scrapy.exceptions import DropItem
 from scrapy.spidermiddlewares.httperror import HttpError
 
 from instascrapy.helpers import ig_extract_shared_data
@@ -37,6 +38,8 @@ class IguserSpider(DynDBSpider):
 
     def parse(self, response):
 
+        if b'Restricted profile' in response.body:
+            raise DropItem('Restricted Profile')
         ig_user_dict = ig_extract_shared_data(response=response, category='user')
         ig_user = IGLoader(item=IGUser())
         ig_user = self._parse_user(loader=ig_user, data=ig_user_dict)
@@ -47,10 +50,8 @@ class IguserSpider(DynDBSpider):
         self.logger.debug(repr(failure))
 
         if failure.check(HttpError):
-            # these exceptions come from HttpError spider middleware
-            # you can get the non-200 response
             response = failure.value.response
             self.logger.debug('HttpError on %s', response.url)
             if response.status == 404:
                 username = response.url.split('/')[-2:-1][0]
-                self.db.set_entity_deleted('USER', username)
+#                self.db.set_entity_deleted('USER', username)

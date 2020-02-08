@@ -3,11 +3,15 @@ import itertools
 import re
 import json
 import random
+from functools import reduce
 from typing import List
 
 from instascrapy.settings import PROXY_LIST
 
 IG_JSON_LOCATION = re.compile('window._sharedData = (.+?);</script>')
+
+def dict_deep_get(dictionary, keys, default=None):
+    return reduce(lambda d, k: d.get(k, default) if isinstance(d, dict) else default, keys.split("."), dictionary)
 
 def ig_extract_shared_data(response, category=None) -> dict:
     """

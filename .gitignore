@@ -132,3 +132,4 @@ dmypy.json
 
 # Instascrapy exports
 *.jl
+/tmp/

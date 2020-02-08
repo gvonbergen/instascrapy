@@ -19,6 +19,11 @@ def nested_dict_sample():
     return nested_dict
 
 
+def test_nested_dict_flat(nested_dict_sample):
+    result = deep_dict_get(nested_dict_sample, 'a')
+    assert isinstance(result, dict)
+
+
 def test_nested_dict_str(nested_dict_sample):
     result = deep_dict_get(nested_dict_sample, 'a.b.c')
     assert result == 'string'

@@ -6,7 +6,7 @@ import scrapy
 from scrapy.exceptions import DropItem
 from scrapy.spidermiddlewares.httperror import HttpError
 
-from instascrapy.helpers import ig_extract_shared_data
+from instascrapy.helpers import ig_extract_shared_data, deep_dict_get
 from instascrapy.items import IGUser, IGLoader
 from instascrapy.spider import DynDBSpider
 
@@ -21,14 +21,14 @@ class IguserSpider(DynDBSpider):
 
     @staticmethod
     def _parse_user(loader, data):
-        FIRST_LEVEL_ITEMS = ['biography', 'external_url', 'external_url_linkshimmed', 'full_name', 'has_channel',
+        USER_ELEMENTS = ['biography', 'external_url', 'external_url_linkshimmed', 'full_name', 'has_channel',
                              'highlight_reel_count', 'id', 'is_business_account', 'is_joined_recently',
                              'business_category_name', 'is_private', 'is_verified', 'profile_pic_url',
-                             'profile_pic_url_hd', 'username', 'connected_fb_page']
-        for entry in FIRST_LEVEL_ITEMS:
-            loader.add_value(entry, data.get(entry))
-        loader.add_value('edge_followed_by_count', data['edge_followed_by']['count'])
-        loader.add_value('edge_follow_count', data['edge_follow']['count'])
+                             'profile_pic_url_hd', 'username', 'connected_fb_page', 'edge_followed_by.count',
+                             'edge_follow.count']
+        for entry in USER_ELEMENTS:
+            loader.add_value(entry.replace('.', '_'), deep_dict_get(data, entry))
+
         loader.add_value('last_posts', [post['node']['shortcode'] for post in
                                         data['edge_owner_to_timeline_media']['edges']])
         loader.add_value('user_json', data)

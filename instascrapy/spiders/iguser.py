@@ -12,44 +12,68 @@ from instascrapy.spider import DynDBSpider
 
 
 class IguserSpider(DynDBSpider):
-    name = 'iguser'
+    name = "iguser"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.keys = kwargs.get('keys', None)
-        self.start_key = kwargs.get('start_key', None)
+        self.keys = kwargs.get("keys", None)
+        self.start_key = kwargs.get("start_key", None)
 
     @staticmethod
     def _parse_user(loader, data):
-        USER_ELEMENTS = ['biography', 'external_url', 'external_url_linkshimmed', 'full_name', 'has_channel',
-                             'highlight_reel_count', 'id', 'is_business_account', 'is_joined_recently',
-                             'business_category_name', 'is_private', 'is_verified', 'profile_pic_url',
-                             'profile_pic_url_hd', 'username', 'connected_fb_page', 'edge_followed_by.count',
-                             'edge_follow.count']
+        USER_ELEMENTS = [
+            "biography",
+            "external_url",
+            "external_url_linkshimmed",
+            "full_name",
+            "has_channel",
+            "highlight_reel_count",
+            "id",
+            "is_business_account",
+            "is_joined_recently",
+            "business_category_name",
+            "is_private",
+            "is_verified",
+            "profile_pic_url",
+            "profile_pic_url_hd",
+            "username",
+            "connected_fb_page",
+            "edge_followed_by.count",
+            "edge_follow.count",
+        ]
         for entry in USER_ELEMENTS:
-            loader.add_value(entry.replace('.', '_'), deep_dict_get(data, entry))
+            loader.add_value(entry.replace(".", "_"), deep_dict_get(data, entry))
 
-        loader.add_value('last_posts', [post['node']['shortcode'] for post in
-                                        data['edge_owner_to_timeline_media']['edges']])
-        loader.add_value('user_json', data)
-        loader.add_value('retrieved_at_time', int(time.time()))
+        loader.add_value(
+            "last_posts",
+            [
+                post["node"]["shortcode"]
+                for post in data["edge_owner_to_timeline_media"]["edges"]
+            ],
+        )
+        loader.add_value("user_json", data)
+        loader.add_value("retrieved_at_time", int(time.time()))
         return loader
 
     def start_requests(self):
         if self.keys:
-            all_users = self.keys.split(',')
+            all_users = self.keys.split(",")
         else:
-            all_users = self.db.get_category_all('USER', 'GSI1', startkey=self.start_key)
+            all_users = self.db.get_category_all(
+                "USER", "GSI1", startkey=self.start_key
+            )
 
         for user in all_users:
-            url = 'https://www.instagram.com/{}/'.format(user)
-            yield scrapy.Request(url=url, callback=self.parse, errback=self.errback, dont_filter=True)
+            url = "https://www.instagram.com/{}/".format(user)
+            yield scrapy.Request(
+                url=url, callback=self.parse, errback=self.errback, dont_filter=True
+            )
 
     def parse(self, response):
 
-        if b'Restricted profile' in response.body:
-            raise DropItem('Restricted Profile')
-        ig_user_dict = ig_extract_shared_data(response=response, category='user')
+        if b"Restricted profile" in response.body:
+            raise DropItem("Restricted Profile")
+        ig_user_dict = ig_extract_shared_data(response=response, category="user")
         ig_user = IGLoader(item=IGUser())
         ig_user = self._parse_user(loader=ig_user, data=ig_user_dict)
 
@@ -60,7 +84,9 @@ class IguserSpider(DynDBSpider):
 
         if failure.check(HttpError):
             response = failure.value.response
-            self.logger.debug('HttpError on %s', response.url)
+            self.logger.debug("HttpError on %s", response.url)
             if response.status == 404:
-                username = response.url.split('/')[-2:-1][0]
+                username = response.url.split("/")[-2:-1][0]
+
+
 #                self.db.set_entity_deleted('USER', username)

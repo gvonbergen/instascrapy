@@ -72,12 +72,13 @@ class IguserSpider(DynDBSpider):
     def parse(self, response):
 
         if b"Restricted profile" in response.body:
-            raise DropItem("Restricted Profile")
-        ig_user_dict = ig_extract_shared_data(response=response, category="user")
-        ig_user = IGLoader(item=IGUser())
-        ig_user = self._parse_user(loader=ig_user, data=ig_user_dict)
+            self.logger.info('Restricted Profile: {}'.format(response.url))
+        else:
+            ig_user_dict = ig_extract_shared_data(response=response, category="user")
+            ig_user = IGLoader(item=IGUser())
+            ig_user = self._parse_user(loader=ig_user, data=ig_user_dict)
 
-        yield ig_user.load_item()
+            yield ig_user.load_item()
 
     def errback(self, failure):
         self.logger.debug(repr(failure))

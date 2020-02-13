@@ -3,19 +3,19 @@ import json
 import time
 
 import scrapy
-from scrapy.exceptions import DropItem
 from scrapy.spidermiddlewares.httperror import HttpError
 
 from instascrapy.helpers import ig_extract_shared_data, deep_dict_get
 from instascrapy.items import IGUser, IGLoader
-from instascrapy.spider import DynDBSpider
+from instascrapy.spider import TxMongoSpider
 
 
-class IguserSpider(DynDBSpider):
+class IguserSpider(TxMongoSpider):
     name = "iguser"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.file = kwargs.get("file", None)
         self.keys = kwargs.get("keys", None)
         self.start_key = kwargs.get("start_key", None)
 
@@ -56,15 +56,16 @@ class IguserSpider(DynDBSpider):
         return loader
 
     def start_requests(self):
-        if self.keys:
+        if self.file:
+            with open(self.file, 'r') as f:
+                all_users = json.load(f)
+        elif self.keys:
             all_users = self.keys.split(",")
         else:
-            all_users = self.db.get_category_all(
-                "USER", "GSI1", startkey=self.start_key
-            )
+            all_users = self.coll.find({'sk': 'USER'})
 
         for user in all_users:
-            url = "https://www.instagram.com/{}/".format(user)
+            url = "https://www.instagram.com/{}/".format(user['pk'][3:])
             yield scrapy.Request(
                 url=url, callback=self.parse, errback=self.errback, dont_filter=True
             )

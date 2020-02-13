@@ -9,6 +9,9 @@ class TxMongoSpider(Spider):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.file = kwargs.get("file", None)
+        self.keys = kwargs.get("keys", None)
+        self.start_key = kwargs.get("start_key", None)
         self.conn = None
         self.db = None
         self.coll = None

@@ -13,12 +13,6 @@ from instascrapy.spider import TxMongoSpider
 class IguserSpider(TxMongoSpider):
     name = "iguser"
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.file = kwargs.get("file", None)
-        self.keys = kwargs.get("keys", None)
-        self.start_key = kwargs.get("start_key", None)
-
     @staticmethod
     def _parse_user(loader, data):
         USER_ELEMENTS = [

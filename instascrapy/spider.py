@@ -1,7 +1,34 @@
 from scrapy import signals
 from scrapy.spiders import Spider
+from pymongo import MongoClient
 
 from instascrapy.db import DynDB
+
+
+class TxMongoSpider(Spider):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.conn = None
+        self.db = None
+        self.coll = None
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = cls(*args, **kwargs)
+        spider._set_crawler(crawler)
+        return spider
+
+    def _set_crawler(self, crawler):
+        self.crawler = crawler
+        self.settings = crawler.settings
+        self.conn = MongoClient(self.settings['MONGO_URI'])
+        self.db = self.conn[self.settings['MONGO_DB']]
+        if self.settings['MONGO_USER'] and self.settings['MONGO_PASSWORD']:
+            self.db.authenticate(self.settings['MONGO_USER'],
+                                 self.settings['MONGO_PASSWORD'])
+        self.coll = self.db[self.settings['MONGO_COLLECTION']]
+        crawler.signals.connect(self.close, signals.spider_closed)
 
 
 class DynDBSpider(Spider):

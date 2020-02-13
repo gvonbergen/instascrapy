@@ -34,3 +34,16 @@ def test_parse_user(ig_user_html):
     for k in ig_user._values.keys():
         if k != 'retrieved_at_time':
             assert ig_user.get_output_value(k) == user_result[k]
+
+
+@pytest.fixture()
+def user_spider(mongodb):
+    spider = IguserSpider()
+    spider.db = mongodb
+    spider.coll = mongodb.user
+    return spider
+
+
+def test_get_entity_user(user_spider):
+    users = list(user_spider.get_entities('USER'))
+    assert users == ['test1', 'test2']

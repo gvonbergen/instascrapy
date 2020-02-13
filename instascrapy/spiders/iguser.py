@@ -58,14 +58,14 @@ class IguserSpider(TxMongoSpider):
     def start_requests(self):
         if self.file:
             with open(self.file, 'r') as f:
-                all_users = json.load(f)
+                all_users = [item[:3] for item in json.load(f)]
         elif self.keys:
-            all_users = self.keys.split(",")
+            all_users = [item[3:] for item in self.keys.split(",")]
         else:
-            all_users = self.coll.find({'sk': 'USER'})
+            all_users = self.get_entities('USER')
 
         for user in all_users:
-            url = "https://www.instagram.com/{}/".format(user['pk'][3:])
+            url = "https://www.instagram.com/{}/".format(user)
             yield scrapy.Request(
                 url=url, callback=self.parse, errback=self.errback, dont_filter=True
             )

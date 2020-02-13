@@ -12,6 +12,7 @@ class TxMongoSpider(Spider):
         self.conn = None
         self.db = None
         self.coll = None
+        self.batch_size = 100
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
@@ -30,6 +31,9 @@ class TxMongoSpider(Spider):
         self.coll = self.db[self.settings['MONGO_COLLECTION']]
         crawler.signals.connect(self.close, signals.spider_closed)
 
+    def get_entities(self, category):
+        for result in self.coll.find({'sk': category}).batch_size(self.batch_size):
+            yield result['pk'][3:]
 
 class DynDBSpider(Spider):
 

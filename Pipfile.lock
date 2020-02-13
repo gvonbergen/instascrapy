@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "be3f99c22aea7e81f7d172373e128dd0dfa60d87157d1e2a926bb40e127fcd79"
+            "sha256": "6aba856bbfe8dd3015fe9e96762dadb5f59a17bb6b7919ad07c74ab9c7f6c1e9"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -39,10 +39,10 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:4c445c6853c137dbddb547242d05294f892d84a5fc6b8ee5077a50c85751b039",
-                "sha256:c42fc35d4e9f82ce72b2a8b8d54df3a57fe363b0763a473e72d0006b0d1e06ff"
+                "sha256:20967a2001be195ff426b9e308f1b732eaf9eb40444508225af0a6d2413581dd",
+                "sha256:bd0d2f37c38854989ccddd7890153980b3fdd72c8711fb07884450b54723c35c"
             ],
-            "version": "==1.17.13"
+            "version": "==1.17.16"
         },
         "awscli-local": {
             "hashes": [
@@ -69,10 +69,10 @@
         },
         "botocore": {
             "hashes": [
-                "sha256:6478d9207db6dbcb5106fd4db2cdd5194d0b2dc0b73776019d56877ab802fe87",
-                "sha256:6ffb78b331b0954cfe5c51958cb51522ab0e2999442422949b080a3e1bc76ee1"
+                "sha256:63dc203046e47573add16c348f00a8e2fe3bb4975323458787e7b2bebeec5923",
+                "sha256:d31d7e0e12fb64d6bd331c6b853750c71423d560cee01a989f607dd45407ef65"
             ],
-            "version": "==1.14.13"
+            "version": "==1.14.16"
         },
         "brotlipy": {
             "hashes": [
@@ -296,6 +296,13 @@
             "markers": "python_version != '3.4'",
             "version": "==4.5.0"
         },
+        "mongomock": {
+            "hashes": [
+                "sha256:36aad3c6127eee9cdb52ac0186c6a60007f2412c9db715645eeccffc1258ce48",
+                "sha256:8faaffd875732bf55e38e1420a1b7212dde8d446c5852afb4c0884c1369b328b"
+            ],
+            "version": "==3.19.0"
+        },
         "more-itertools": {
             "hashes": [
                 "sha256:5dd8bcf33e5f9513ffa06d5ad33d78f31e1931ac9a18f33d37e77a180d393a7c",
@@ -494,6 +501,13 @@
             "index": "pypi",
             "version": "==1.3.1"
         },
+        "pytest-mongodb": {
+            "hashes": [
+                "sha256:60c25a78ed0e8f76da91598ae191c491bc2ba419bd649015b53ab3d7b6236945"
+            ],
+            "index": "pypi",
+            "version": "==2.2.0"
+        },
         "python-dateutil": {
             "hashes": [
                 "sha256:73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c",
@@ -595,6 +609,12 @@
             ],
             "index": "pypi",
             "version": "==0.6.2"
+        },
+        "sentinels": {
+            "hashes": [
+                "sha256:7be0704d7fe1925e397e92d18669ace2f619c92b5d4eb21a89f31e026f9ff4b1"
+            ],
+            "version": "==1.0.0"
         },
         "service-identity": {
             "hashes": [

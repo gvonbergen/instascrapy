@@ -38,6 +38,10 @@ class TxMongoSpider(Spider):
         for result in self.coll.find({'sk': category}).batch_size(self.batch_size):
             yield result['pk'][3:]
 
+    def set_entity_deleted(self, entity, prefix):
+        self.coll.update_one({'pk': '{}{}'.format(prefix, entity)},
+                             {'$set': {'deleted': True}})
+
 class DynDBSpider(Spider):
 
     def __init__(self, **kwargs):

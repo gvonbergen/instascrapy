@@ -13,6 +13,10 @@ from instascrapy.spider import TxMongoSpider
 class IguserSpider(TxMongoSpider):
     name = "iguser"
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.prefix = 'US#'
+
     @staticmethod
     def _parse_user(loader, data):
         USER_ELEMENTS = [
@@ -52,9 +56,9 @@ class IguserSpider(TxMongoSpider):
     def start_requests(self):
         if self.file:
             with open(self.file, 'r') as f:
-                all_users = [item[:3] for item in json.load(f)]
+                all_users = [item[3:] for item in json.load(f)]
         elif self.keys:
-            all_users = [item[3:] for item in self.keys.split(",")]
+            all_users = [item for item in self.keys.split(",")]
         else:
             all_users = self.get_entities('USER')
 
@@ -83,6 +87,5 @@ class IguserSpider(TxMongoSpider):
             self.logger.debug("HttpError on %s", response.url)
             if response.status == 404:
                 username = response.url.split("/")[-2:-1][0]
+                self.set_entity_deleted(username, self.prefix)
 
-
-#                self.db.set_entity_deleted('USER', username)

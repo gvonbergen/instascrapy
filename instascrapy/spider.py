@@ -35,7 +35,7 @@ class TxMongoSpider(Spider):
         crawler.signals.connect(self.close, signals.spider_closed)
 
     def get_entities(self, category):
-        for result in self.coll.find({'sk': category}).batch_size(self.batch_size):
+        for result in self.coll.find({'sk': category, 'deleted': {'$exists': False}}, batch_size=self.batch_size):
             yield result['pk'][3:]
 
     def set_entity_deleted(self, entity, prefix):

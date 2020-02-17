@@ -47,3 +47,25 @@ def user_spider(mongodb):
 def test_get_entity_user(user_spider):
     users = list(user_spider.get_entities('USER'))
     assert users == ['test1', 'test2']
+
+
+def test_set_entity_deleted(user_spider):
+    """Standard test to verify if attribute is set to deleted=True"""
+    user_spider.set_entity_deleted('test2', 'US#')
+    deleted_user = user_spider.coll.find_one({'pk': 'US#test2'})
+    assert deleted_user['deleted'] == True
+
+
+def test_set_entity_deleted_xcheck(user_spider):
+    """Test verifies that only one item is set to delete and not both"""
+    user_spider.set_entity_deleted('test1', 'US#')
+    xcheck_user = user_spider.coll.find_one({'pk': 'US#test2'})
+    with pytest.raises(KeyError):
+        assert xcheck_user['deleted']
+
+
+def test_set_entity_deleted_not_existent(user_spider):
+    """Test to verify behavior when non existent key is updated"""
+    user_spider.set_entity_deleted('test0', 'US#')
+    not_existent = user_spider.coll.find_one({'pk': 'US#test0'})
+    assert not_existent == None

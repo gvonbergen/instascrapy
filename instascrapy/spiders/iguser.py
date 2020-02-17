@@ -16,6 +16,7 @@ class IguserSpider(TxMongoSpider):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.prefix = 'US#'
+        self.secondary_key = 'USER'
 
     @staticmethod
     def _parse_user(loader, data):

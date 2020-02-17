@@ -6,9 +6,20 @@
 -
   _id: 2
   pk: US#test2
-  sk: USER
+  sk: US#UPDA#V1#2020-02-17T21:48:18
 
 -
   _id: 3
   pk: PO#POST1
   sk: POST
+
+-
+  _id: 4
+  pk: US#test2
+  sk: USER
+
+-
+  _id: 5
+  pk: US#test3
+  sk: USER
+  deleted: True

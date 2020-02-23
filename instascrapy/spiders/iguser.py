@@ -59,7 +59,7 @@ class IguserSpider(TxMongoSpider):
         elif self.keys:
             all_users = [item for item in self.keys.split(",")]
         else:
-            all_users = self.get_entities('USER')
+            all_users = self.get_entities(self.secondary_key)
 
         for user in all_users:
             url = "https://www.instagram.com/{}/".format(user)

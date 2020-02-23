@@ -37,6 +37,15 @@ class TxMongoSpider(Spider):
         self.coll = self.db[self.settings['MONGO_COLLECTION']]
         crawler.signals.connect(self.close, signals.spider_closed)
 
+    def crawling_scope(self):
+        if self.file:
+            scope = self.read_file()
+        elif self.keys:
+            scope = [item for item in self.keys.split(",")]
+        else:
+            scope = self.get_entities(self.secondary_key)
+        return scope
+
     def read_file(self):
         with open(self.file, 'r') as f:
             return [item for item in json.load(f)]

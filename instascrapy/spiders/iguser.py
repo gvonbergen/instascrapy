@@ -54,12 +54,7 @@ class IguserSpider(TxMongoSpider):
         return loader
 
     def start_requests(self):
-        if self.file:
-            all_users = self.read_file()
-        elif self.keys:
-            all_users = [item for item in self.keys.split(",")]
-        else:
-            all_users = self.get_entities(self.secondary_key)
+        all_users = self.crawling_scope()
 
         for user in all_users:
             url = "https://www.instagram.com/{}/".format(user)

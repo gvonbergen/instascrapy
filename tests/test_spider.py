@@ -78,3 +78,10 @@ def test_set_entity_already_exists(user_spider):
     result2 = user_spider.coll.find_one({'pk': 'US#test3', 'sk': 'USER'})
     assert result == result2
 
+
+def test_user_noprefix(datadir):
+    spider = IguserSpider()
+    spider.file = datadir / 'users.json'
+    users = spider.read_file()
+    assert isinstance(users, list)
+    assert users == ['user1', 'user2']

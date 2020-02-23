@@ -56,8 +56,7 @@ class IguserSpider(TxMongoSpider):
 
     def start_requests(self):
         if self.file:
-            with open(self.file, 'r') as f:
-                all_users = [item[3:] for item in json.load(f)]
+            all_users = self.read_file()
         elif self.keys:
             all_users = [item for item in self.keys.split(",")]
         else:

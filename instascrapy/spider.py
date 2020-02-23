@@ -1,3 +1,5 @@
+import json
+
 from scrapy import signals
 from scrapy.spiders import Spider
 from pymongo import MongoClient
@@ -33,6 +35,10 @@ class TxMongoSpider(Spider):
                                  self.settings['MONGO_PASSWORD'])
         self.coll = self.db[self.settings['MONGO_COLLECTION']]
         crawler.signals.connect(self.close, signals.spider_closed)
+
+    def read_file(self):
+        with open(self.file, 'r') as f:
+            return [item for item in json.load(f)]
 
     def get_entities(self, category):
         for result in self.coll.find({'sk': category, 'deleted': {'$exists': False}}, batch_size=self.batch_size):

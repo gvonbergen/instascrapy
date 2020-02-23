@@ -46,8 +46,13 @@ class TxMongoSpider(Spider):
             yield result['pk'][3:]
 
     def set_entity_deleted(self, entity):
-        self.coll.update_one({'pk': '{}{}'.format(self.prefix, entity), 'sk': self.secondary_key},
-                             {'$set': {'deleted': True}})
+        """Sets the entity to deleted"""
+        entry = {'pk': '{}{}'.format(self.prefix, entity), 'sk': self.secondary_key}
+        if self.coll.find_one(entry):
+            self.coll.update_one(entry, {'$set': {'deleted': True}})
+        else:
+            entry.update({'deleted': True})
+            self.coll.insert_one(entry)
 
 class DynDBSpider(Spider):
 

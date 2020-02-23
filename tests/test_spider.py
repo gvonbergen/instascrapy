@@ -66,12 +66,16 @@ def test_set_entity_deleted_xcheck(user_spider):
 
 def test_set_entity_deleted_not_existent(user_spider):
     """Test to verify behavior when non existent key is updated"""
+    not_existent = user_spider.coll.find_one({'pk': 'US#test0', 'sk': 'USER'})
+    assert not_existent is None
     user_spider.set_entity_deleted('test0')
     not_existent = user_spider.coll.find_one({'pk': 'US#test0', 'sk': 'USER'})
-    assert not_existent == None
+    not_existent.pop('_id')
+    assert not_existent == {'pk': 'US#test0', 'sk': 'USER', 'deleted': True}
 
 
-def test_set_entity_already_exists(user_spider):
+def test_set_entity_already_deleted(user_spider):
+    """Verifies that the state doesn't change if there is a deleted entity"""
     result = user_spider.coll.find_one({'pk': 'US#test3', 'sk': 'USER'})
     assert result['deleted'] == True
     user_spider.set_entity_deleted('test3')
@@ -79,7 +83,8 @@ def test_set_entity_already_exists(user_spider):
     assert result == result2
 
 
-def test_user_noprefix(datadir):
+def test_file_read_no_prefix(datadir):
+    """Test if file is read correctly when provided in command line"""
     spider = IguserSpider()
     spider.file = datadir / 'users.json'
     users = spider.read_file()

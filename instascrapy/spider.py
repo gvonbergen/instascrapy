@@ -45,8 +45,8 @@ class TxMongoSpider(Spider):
         for result in self.coll.find({'sk': category, 'deleted': {'$exists': False}}, batch_size=self.batch_size):
             yield result['pk'][3:]
 
-    def set_entity_deleted(self, entity, prefix, secondary_key):
-        self.coll.update_one({'pk': '{}{}'.format(prefix, entity), 'sk': secondary_key},
+    def set_entity_deleted(self, entity):
+        self.coll.update_one({'pk': '{}{}'.format(self.prefix, entity), 'sk': self.secondary_key},
                              {'$set': {'deleted': True}})
 
 class DynDBSpider(Spider):

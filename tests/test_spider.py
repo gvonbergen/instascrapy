@@ -51,14 +51,14 @@ def test_get_entity_user(user_spider):
 
 def test_set_entity_deleted(user_spider):
     """Standard test to verify if attribute is set to deleted=True"""
-    user_spider.set_entity_deleted('test2', 'US#', 'USER')
+    user_spider.set_entity_deleted('test2')
     deleted_user = user_spider.coll.find_one({'pk': 'US#test2', 'sk': 'USER'})
     assert deleted_user['deleted'] == True
 
 
 def test_set_entity_deleted_xcheck(user_spider):
     """Test verifies that only one item is set to delete and not both"""
-    user_spider.set_entity_deleted('test1', 'US#', 'USER')
+    user_spider.set_entity_deleted('test1')
     xcheck_user = user_spider.coll.find_one({'pk': 'US#test2', 'sk': 'USER'})
     with pytest.raises(KeyError):
         assert xcheck_user['deleted']
@@ -66,7 +66,7 @@ def test_set_entity_deleted_xcheck(user_spider):
 
 def test_set_entity_deleted_not_existent(user_spider):
     """Test to verify behavior when non existent key is updated"""
-    user_spider.set_entity_deleted('test0', 'US#', 'USER')
+    user_spider.set_entity_deleted('test0')
     not_existent = user_spider.coll.find_one({'pk': 'US#test0', 'sk': 'USER'})
     assert not_existent == None
 
@@ -74,7 +74,7 @@ def test_set_entity_deleted_not_existent(user_spider):
 def test_set_entity_already_exists(user_spider):
     result = user_spider.coll.find_one({'pk': 'US#test3', 'sk': 'USER'})
     assert result['deleted'] == True
-    user_spider.set_entity_deleted('test3', 'US#', 'USER')
+    user_spider.set_entity_deleted('test3')
     result2 = user_spider.coll.find_one({'pk': 'US#test3', 'sk': 'USER'})
     assert result == result2
 

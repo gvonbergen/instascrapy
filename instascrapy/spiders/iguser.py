@@ -17,6 +17,15 @@ class IguserSpider(TxMongoSpider):
         self.prefix = "US#"
         self.secondary_key = "USER"
 
+    def start_requests(self):
+        all_users = self.crawling_scope()
+
+        for user in all_users:
+            url = "https://www.instagram.com/{}/".format(user)
+            yield scrapy.Request(
+                url=url, callback=self.parse, errback=self.errback, dont_filter=True
+            )
+
     @staticmethod
     def _parse_user(loader, data):
         USER_ELEMENTS = [
@@ -52,15 +61,6 @@ class IguserSpider(TxMongoSpider):
         loader.add_value("user_json", data)
         loader.add_value("retrieved_at_time", int(time.time()))
         return loader
-
-    def start_requests(self):
-        all_users = self.crawling_scope()
-
-        for user in all_users:
-            url = "https://www.instagram.com/{}/".format(user)
-            yield scrapy.Request(
-                url=url, callback=self.parse, errback=self.errback, dont_filter=True
-            )
 
     def parse(self, response):
 

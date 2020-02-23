@@ -5,21 +5,22 @@ verify_ssl = true
 
 [dev-packages]
 coverage = "*"
+pytest-vcr = "==1.0.2"
+pytest-mongodb = "==2.2.0"
+pytest-datadir = "==1.3.1"
+black = "==19.10b0"
+requests-mock = "==1.7.0"
+requests = "==2.22.0"
+awscli-local = "==0.5"
+pytest = "*"
 
 [packages]
 brotlipy = "==0.7.0"
-pytest = "*"
 scrapy = "==1.8.0"
 scrapy-rotating-proxies = "==0.6.2"
 pillow = "==7.0.0"
-awscli-local = "==0.5"
 txmongo = "==19.2"
 boto3 = "==1.11.9"
-requests-mock = "==1.7.0"
-requests = "==2.22.0"
-pytest-datadir = "==1.3.1"
-black = "==19.10b0"
-pytest-mongodb = "==2.2.0"
 
 [requires]
 python_version = "3.6"

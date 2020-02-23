@@ -13,11 +13,12 @@ class TxMongoSpider(Spider):
         super().__init__(**kwargs)
         self.file = kwargs.get("file", None)
         self.keys = kwargs.get("keys", None)
-        self.start_key = kwargs.get("start_key", None)
         self.conn = None
         self.db = None
         self.coll = None
         self.batch_size = 100
+        self.prefix = None
+        self.secondary_key = None
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):

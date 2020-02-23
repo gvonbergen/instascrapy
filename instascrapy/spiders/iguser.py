@@ -71,7 +71,7 @@ class IguserSpider(TxMongoSpider):
     def parse(self, response):
 
         if b"Restricted profile" in response.body:
-            self.logger.info('Restricted Profile: {}'.format(response.url))
+            self.logger.info('Age check: {}'.format(response.url))
         else:
             ig_user_dict = ig_extract_shared_data(response=response, category="user")
             ig_user = IGLoader(item=IGUser())

@@ -233,7 +233,19 @@ def mongo_dict(item):
                 'sk': 'POST',
                 'discovered_at_time': retrieved_at_time
             })
-
+    if isinstance(item, IGPost):
+        primary_key = 'PO#{}'.format(item.get('shortcode'))
+        secondary_key = 'POST'
+        db_entry.update({
+            'pk': primary_key,
+            'sk': 'PO#UPDA#V1#{}'.format(retrieved_at_time_readable),
+            'shortcode': item.get('shortcode'),
+            'owner': item.get('owner_username'),
+            'owner_id': item.get('owner_id'),
+            'id': item.get('id'),
+            'json': item.get('post_json')
+        })
+        db_entries.append(db_entry)
     else:
         primary_key = None
         secondary_key = None
@@ -282,11 +294,20 @@ class MongoDBPipeline(object):
         except BulkWriteError as e:
             failed_items = ', '.join([x['keyValue']['pk'] for x in e.details['writeErrors']])
             log.debug('Item(s) not written to DB: {}'.format(failed_items))
-        yield self.collection.update_one(
-            {'pk': primary_key, 'sk': secondary_key},
-            {'$set': {
-                'retrieved_at_time': item.get('retrieved_at_time')
-            }}
-        )
+        if isinstance(item, IGPost):
+            yield self.collection.update_one(
+                {'pk': primary_key, 'sk': secondary_key},
+                {'$set': {
+                    'retrieved_at_time': item.get('retrieved_at_time'),
+                    'image': item.get('images')[0]
+                }}
+            )
+        else:
+            yield self.collection.update_one(
+                {'pk': primary_key, 'sk': secondary_key},
+                {'$set': {
+                    'retrieved_at_time': item.get('retrieved_at_time')
+                }}
+            )
 
         return item

@@ -88,5 +88,5 @@ class IguserSpider(TxMongoSpider):
             self.logger.debug("HttpError on %s", response.url)
             if response.status == 404:
                 username = response.url.split("/")[-2:-1][0]
-                self.set_entity_deleted(username, self.prefix)
+                self.set_entity_deleted(username, self.prefix, self.secondary_key)
 

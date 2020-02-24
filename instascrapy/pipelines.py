@@ -233,7 +233,7 @@ def mongo_dict(item):
                 'sk': 'POST',
                 'discovered_at_time': retrieved_at_time
             })
-    if isinstance(item, IGPost):
+    elif isinstance(item, IGPost):
         primary_key = 'PO#{}'.format(item.get('shortcode'))
         secondary_key = 'POST'
         db_entry.update({
@@ -241,8 +241,8 @@ def mongo_dict(item):
             'sk': 'PO#UPDA#V1#{}'.format(retrieved_at_time_readable),
             'shortcode': item.get('shortcode'),
             'owner': item.get('owner_username'),
-            'owner_id': item.get('owner_id'),
-            'id': item.get('id'),
+            'owner_id': int(item.get('owner_id')),
+            'id': int(item.get('id')),
             'json': item.get('post_json')
         })
         db_entries.append(db_entry)

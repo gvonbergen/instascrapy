@@ -50,9 +50,15 @@ class TxMongoSpider(Spider):
         with open(self.file, 'r') as f:
             return [item for item in json.load(f)]
 
-    def get_entities(self, category):
-        for result in self.coll.find({'sk': category, 'deleted': {'$exists': False}}, batch_size=self.batch_size):
-            yield result['pk'][3:]
+    def get_entities(self, category, get_retrieved=False):
+        if get_retrieved:
+            for result in self.coll.find({'sk': category, 'deleted': {'$exists': False}}, batch_size=self.batch_size):
+                yield result['pk'][3:]
+        else:
+            for result in self.coll.find({'sk': category, 'deleted': {'$exists': False},
+                                          'retrieved_at_time': {'$exists': False}},
+                                         batch_size=self.batch_size):
+                yield result['pk'][3:]
 
     def set_entity_deleted(self, entity):
         """Sets the entity to deleted"""

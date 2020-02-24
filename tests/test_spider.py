@@ -45,8 +45,15 @@ def user_spider(mongodb):
 
 
 def test_get_entity_user(user_spider):
+    """Retrieve entities which are not yet downloaded"""
     users = list(user_spider.get_entities('USER'))
     assert users == ['test1', 'test2']
+
+
+def test_get_entity_user_including_downloaded(user_spider):
+    """Retrieve entities which have already been downloaded but are not deleted"""
+    users = list(user_spider.get_entities('USER', get_retrieved=True))
+    assert users == ['test1', 'test2', 'user4']
 
 
 def test_set_entity_deleted(user_spider):

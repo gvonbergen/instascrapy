@@ -23,3 +23,9 @@
   pk: US#test3
   sk: USER
   deleted: True
+
+-
+  _id: 6
+  pk: US#user4
+  sk: USER
+  retrieved_at_time: 5

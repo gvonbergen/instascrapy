@@ -85,7 +85,7 @@ class IGUser(scrapy.Item):
     full_name = scrapy.Field()
     has_channel = scrapy.Field()
     highlight_reel_count = scrapy.Field()
-    id = scrapy.Field(serializer=int)
+    id = scrapy.Field(output_processor=Compose(TakeFirst(), int))
     is_business_account = scrapy.Field()
     is_joined_recently = scrapy.Field()
     business_category_name = scrapy.Field()
@@ -96,12 +96,12 @@ class IGUser(scrapy.Item):
     username = scrapy.Field()
     connected_fb_page = scrapy.Field()
     last_posts = scrapy.Field(output_processor=Identity())
-    retrieved_at_time = scrapy.Field()
+    retrieved_at_time = scrapy.Field(output_processor=Compose(TakeFirst(), int))
     user_json = scrapy.Field()
 
 
 class IGPost(scrapy.Item):
-    id = scrapy.Field()
+    id = scrapy.Field(output_processor=Compose(TakeFirst(), int))
     shortcode = scrapy.Field()
     dimensions = scrapy.Field()
     fact_check_overall_rating = scrapy.Field()
@@ -125,7 +125,7 @@ class IGPost(scrapy.Item):
     location = scrapy.Field()
     location_id = scrapy.Field()
     owner_username = scrapy.Field()
-    owner_id = scrapy.Field()
+    owner_id = scrapy.Field(output_processor=Compose(TakeFirst(), int))
     is_ad = scrapy.Field()
     edge_web_media_to_related_media = scrapy.Field()
     retrieved_at_time = scrapy.Field()

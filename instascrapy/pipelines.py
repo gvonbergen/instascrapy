@@ -223,7 +223,7 @@ def mongo_dict(item):
         db_entry.update({'pk': primary_key,
                          'sk': secondary_key_update("US#", retrieved_at_time),
                          'username': item.get('username'),
-                         'id': int(item.get('id')),
+                         'user_id': item.get('id'),
                          'json': item.get('user_json')})
         db_entries.append(db_entry)
         db_entries.append({'pk': primary_key, 'sk': secondary_key, 'discovered_at_time': retrieved_at_time})
@@ -240,9 +240,9 @@ def mongo_dict(item):
             'pk': primary_key,
             'sk': secondary_key_update("PO#", retrieved_at_time),
             'shortcode': item.get('shortcode'),
-            'owner': item.get('owner_username'),
-            'owner_id': int(item.get('owner_id')),
-            'id': int(item.get('id')),
+            'username': item.get('owner_username'),
+            'user_id': item.get('owner_id'),
+            'post_id': item.get('id'),
             'json': item.get('post_json')
         })
         db_entries.append(db_entry)

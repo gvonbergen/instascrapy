@@ -75,17 +75,17 @@ def test_set_entity_deleted_not_existent(user_spider):
     """Test to verify behavior when non existent key is updated"""
     not_existent = user_spider.coll.find_one({'pk': 'US#test0', 'sk': 'USER'})
     assert not_existent is None
-    user_spider.set_entity_deleted('test0')
+    user_spider.set_entity_deleted('test0', 123)
     not_existent = user_spider.coll.find_one({'pk': 'US#test0', 'sk': 'USER'})
     not_existent.pop('_id')
-    assert not_existent == {'pk': 'US#test0', 'sk': 'USER', 'deleted': True}
+    assert not_existent == {'pk': 'US#test0', 'sk': 'USER', 'deleted': True, 'deleted_at_time': 123}
 
 
 def test_set_entity_already_deleted(user_spider):
     """Verifies that the state doesn't change if there is a deleted entity"""
     result = user_spider.coll.find_one({'pk': 'US#test3', 'sk': 'USER'})
     assert result['deleted'] == True
-    user_spider.set_entity_deleted('test3')
+    user_spider.set_entity_deleted('test3', 123)
     result2 = user_spider.coll.find_one({'pk': 'US#test3', 'sk': 'USER'})
     assert result == result2
 

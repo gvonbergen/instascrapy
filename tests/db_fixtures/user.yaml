@@ -23,6 +23,7 @@
   pk: US#test3
   sk: USER
   deleted: True
+  deleted_at_time: 123
 
 -
   _id: 6

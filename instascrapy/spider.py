@@ -1,4 +1,5 @@
 import json
+import time
 
 from scrapy import signals
 from scrapy.spiders import Spider
@@ -60,13 +61,15 @@ class TxMongoSpider(Spider):
                                          batch_size=self.batch_size):
                 yield result['pk'][3:]
 
-    def set_entity_deleted(self, entity):
+    def set_entity_deleted(self, entity, actual_time=None):
         """Sets the entity to deleted"""
+        if not actual_time:
+            actual_time = int(time.time())
         entry = {'pk': '{}{}'.format(self.prefix, entity), 'sk': self.secondary_key}
         if self.coll.find_one(entry):
-            self.coll.update_one(entry, {'$set': {'deleted': True}})
+            self.coll.update_one(entry, {'$set': {'deleted': True, 'deleted_at_time': actual_time}})
         else:
-            entry.update({'deleted': True})
+            entry.update({'deleted': True, 'deleted_at_time': actual_time})
             self.coll.insert_one(entry)
 
 class DynDBSpider(Spider):

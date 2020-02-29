@@ -226,7 +226,7 @@ def mongo_dict(item):
                          'id': int(item.get('id')),
                          'json': item.get('user_json')})
         db_entries.append(db_entry)
-        db_entries.append({'pk': primary_key, 'sk': secondary_key})
+        db_entries.append({'pk': primary_key, 'sk': secondary_key, 'discovered_at_time': retrieved_at_time})
         for post in item.get('last_posts', []):
             db_entries.append({
                 'pk': 'PO#{}'.format(post),
@@ -246,6 +246,7 @@ def mongo_dict(item):
             'json': item.get('post_json')
         })
         db_entries.append(db_entry)
+        db_entries.append({'pk': primary_key, 'sk': secondary_key, 'discovered_at_time': retrieved_at_time})
     else:
         primary_key = None
         secondary_key = None
@@ -294,20 +295,22 @@ class MongoDBPipeline(object):
         except BulkWriteError as e:
             failed_items = ', '.join([x['keyValue']['pk'] for x in e.details['writeErrors']])
             log.debug('Item(s) not written to DB: {}'.format(failed_items))
+
+        set_values = {}
+        set_values['retrieved_at_time'] = item.get('retrieved_at_time')
+
         if isinstance(item, IGPost):
             yield self.collection.update_one(
                 {'pk': primary_key, 'sk': secondary_key},
                 {'$set': {
-                    'retrieved_at_time': item.get('retrieved_at_time'),
-                    'image': item.get('images')[0]
+                    'image': item.get('images')[0],
+                    **set_values
                 }}
             )
         else:
             yield self.collection.update_one(
                 {'pk': primary_key, 'sk': secondary_key},
-                {'$set': {
-                    'retrieved_at_time': item.get('retrieved_at_time')
-                }}
+                {'$set': set_values}
             )
 
         return item

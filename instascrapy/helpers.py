@@ -2,6 +2,7 @@
 import itertools
 import re
 import json
+import time
 import random
 from functools import reduce
 from typing import List
@@ -72,3 +73,8 @@ def read_post_shortcodes(user_json) -> None or List:
         return None
     else:
         return [post['node']['shortcode'] for post in user_json['edge_owner_to_timeline_media']['edges']]
+
+
+def secondary_key_update(prefix: str, unix_time: int, version="V1") -> str:
+    time_readable = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(unix_time))
+    return "{}UPDA#{}#{}".format(prefix, version, time_readable)

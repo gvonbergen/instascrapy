@@ -18,6 +18,7 @@ from twisted.internet.defer import inlineCallbacks
 from txmongo.connection import ConnectionPool
 from bson.codec_options import DEFAULT_CODEC_OPTIONS
 
+from instascrapy.helpers import secondary_key_update
 from instascrapy.items import IGUser, IGPost, IGLocation
 from instascrapy.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, DYNAMODB_PIPELINE_REGION_NAME, \
     DYNAMODB_PIPELINE_TABLE_NAME, DYNAMODB_EXPORTER_IGUSER_FIELDS, \
@@ -212,7 +213,6 @@ class DynamoDbPipeline(object):
 
 def mongo_dict(item):
     retrieved_at_time = item.get('retrieved_at_time')
-    retrieved_at_time_readable = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(retrieved_at_time))
     db_entries = []
     db_entry = {
         'retrieved_at_time': retrieved_at_time
@@ -221,7 +221,7 @@ def mongo_dict(item):
         primary_key = 'US#{}'.format(item.get('username'))
         secondary_key = 'USER'
         db_entry.update({'pk': primary_key,
-                         'sk': 'US#UPDA#V1#{}'.format(retrieved_at_time_readable),
+                         'sk': secondary_key_update("US#", retrieved_at_time),
                          'username': item.get('username'),
                          'id': int(item.get('id')),
                          'json': item.get('user_json')})
@@ -238,7 +238,7 @@ def mongo_dict(item):
         secondary_key = 'POST'
         db_entry.update({
             'pk': primary_key,
-            'sk': 'PO#UPDA#V1#{}'.format(retrieved_at_time_readable),
+            'sk': secondary_key_update("PO#", retrieved_at_time),
             'shortcode': item.get('shortcode'),
             'owner': item.get('owner_username'),
             'owner_id': int(item.get('owner_id')),

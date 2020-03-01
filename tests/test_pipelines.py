@@ -44,6 +44,9 @@ class TestIGUserMongo:
 
         return mongodb_pipeline
 
+    def test_iguser_entries(self, write_iguser):
+        assert len(list(write_iguser.collection.find({}))) == 4
+
     @pytest.fixture()
     def iguser_main(self, write_iguser):
         return write_iguser.collection.find_one({"pk": "US#testuser", "sk": {"$regex": "USER"}})
@@ -128,6 +131,9 @@ class TestIGPostMongo:
         igpost["images"] = [{"test1": "result1"}]
         mongodb_pipeline.process_item(igpost, spider)
         return mongodb_pipeline
+
+    def test_igpost_entries(self, write_igpost):
+        assert len(list(write_igpost.collection.find({}))) == 2
 
     @pytest.fixture()
     def igpost_main(self, write_igpost):

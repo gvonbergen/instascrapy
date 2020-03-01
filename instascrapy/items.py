@@ -128,7 +128,7 @@ class IGPost(scrapy.Item):
     owner_id = scrapy.Field(output_processor=Compose(TakeFirst(), int))
     is_ad = scrapy.Field()
     edge_web_media_to_related_media = scrapy.Field()
-    retrieved_at_time = scrapy.Field()
+    retrieved_at_time = scrapy.Field(output_processor=Compose(TakeFirst(), int))
     post_json = scrapy.Field()
     image_urls = scrapy.Field(output_processor=Identity())
     images = scrapy.Field()

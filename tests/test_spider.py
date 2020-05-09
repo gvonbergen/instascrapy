@@ -52,8 +52,8 @@ def test_get_entity_user(user_spider):
 
 def test_get_entity_user_including_downloaded(user_spider):
     """Retrieve entities which have already been downloaded but are not deleted"""
-    users = list(user_spider.get_entities('USER', get_retrieved=True))
-    assert users == ['test1', 'test2', 'user4']
+    users = list(user_spider.get_entities('USER', update_mode=True))
+    assert users == ['user4']
 
 
 def test_set_entity_deleted(user_spider):

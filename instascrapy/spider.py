@@ -42,16 +42,24 @@ class TxMongoSpider(Spider):
         elif hasattr(self, "keys"):
             scope = [item for item in self.keys.split(",")]
         else:
-            scope = self.get_entities(self.secondary_key)
+            update_mode = getattr(self, "update", False)
+            scope = self.get_entities(self.secondary_key, update_mode)
         return scope
 
     def read_file(self):
         with open(self.file, 'r') as f:
             return [item for item in json.load(f)]
 
-    def get_entities(self, category, get_retrieved=False):
-        if get_retrieved:
-            for result in self.coll.find({'sk': category, 'deleted': {'$exists': False}}, batch_size=self.batch_size):
+    def get_entities(self, category, update_mode=False):
+        if update_mode:
+            for result in self.coll.find(
+                    {
+                        'sk': category,
+                        "retrieved_at_time": {"$exists": True},
+                        'deleted': {'$exists': False}
+                    },
+                    batch_size=self.batch_size
+            ):
                 yield result['pk'][3:]
         else:
             for result in self.coll.find({'sk': category, 'deleted': {'$exists': False},

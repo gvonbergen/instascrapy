@@ -12,8 +12,6 @@ class TxMongoSpider(Spider):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.file = kwargs.get("file", None)
-        self.keys = kwargs.get("keys", None)
         self.conn = None
         self.db = None
         self.coll = None
@@ -39,9 +37,9 @@ class TxMongoSpider(Spider):
         crawler.signals.connect(self.close, signals.spider_closed)
 
     def crawling_scope(self):
-        if self.file:
+        if hasattr(self, "file"):
             scope = self.read_file()
-        elif self.keys:
+        elif hasattr(self, "keys"):
             scope = [item for item in self.keys.split(",")]
         else:
             scope = self.get_entities(self.secondary_key)

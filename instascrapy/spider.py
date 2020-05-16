@@ -12,10 +12,7 @@ class TxMongoSpider(Spider):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.conn = None
-        self.db = None
         self.coll = None
-        self.batch_size = 100
         self.prefix = None
         self.secondary_key = None
 
@@ -28,12 +25,9 @@ class TxMongoSpider(Spider):
     def _set_crawler(self, crawler):
         self.crawler = crawler
         self.settings = crawler.settings
-        self.conn = MongoClient(self.settings['MONGO_URI'])
-        self.db = self.conn[self.settings['MONGO_DB']]
-        if self.settings['MONGO_USER'] and self.settings['MONGO_PASSWORD']:
-            self.db.authenticate(self.settings['MONGO_USER'],
-                                 self.settings['MONGO_PASSWORD'])
-        self.coll = self.db[self.settings['MONGO_COLLECTION']]
+        client = MongoClient(self.settings["MONGODB_URI"])
+        db = client[self.settings["MONGODB_DB"]]
+        self.coll = db[self.settings["MONGODB_COLLECTION"]]
         crawler.signals.connect(self.close, signals.spider_closed)
 
     def crawling_scope(self):
@@ -57,14 +51,12 @@ class TxMongoSpider(Spider):
                         'sk': category,
                         "retrieved_at_time": {"$exists": True},
                         'deleted': {'$exists': False}
-                    },
-                    batch_size=self.batch_size
+                    }
             ):
                 yield result['pk'][3:]
         else:
             for result in self.coll.find({'sk': category, 'deleted': {'$exists': False},
-                                          'retrieved_at_time': {'$exists': False}},
-                                         batch_size=self.batch_size):
+                                          'retrieved_at_time': {'$exists': False}}):
                 yield result['pk'][3:]
 
     def set_entity_deleted(self, entity, actual_time=None):

@@ -94,6 +94,6 @@ def test_file_read_no_prefix(datadir):
     """Test if file is read correctly when provided in command line"""
     spider = IguserSpider()
     spider.file = datadir / 'users.json'
-    users = spider.read_file()
+    users = spider.read_file_json(spider.file)
     assert isinstance(users, list)
     assert users == ['user1', 'user2']

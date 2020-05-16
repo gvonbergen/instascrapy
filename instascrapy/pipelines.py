@@ -267,9 +267,9 @@ class MongoDBPipeline(object):
     @classmethod
     def from_crawler(cls, crawler):
         return cls(
-            mongo_uri=crawler.settings.get('MONGODB_URI'),
-            mongo_db=crawler.settings.get('MONGODB_DB'),
-            mongo_collection=crawler.settings.get('MONGODB_COLLECTION'),
+            mongodb_uri=crawler.settings.get('MONGODB_URI'),
+            mongodb_db=crawler.settings.get('MONGODB_DB'),
+            mongodb_collection=crawler.settings.get('MONGODB_COLLECTION'),
         )
 
     @inlineCallbacks

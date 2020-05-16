@@ -9,12 +9,10 @@ from instascrapy.pipelines import MongoDBPipeline
 
 @pytest.fixture()
 def mongodb_pipeline(mongodb):
-    mongo_pipe = MongoDBPipeline(mongo_uri="localhost",
-                                 mongo_db="instascrapy",
-                                 mongo_collection="dev",
-                                 mongo_user="None",
-                                 mongo_password="None")
-    mongo_pipe.collection = mongodb.pipeline
+    mongo_pipe = MongoDBPipeline(mongodb_uri="localhost",
+                                 mongodb_db="instascrapy",
+                                 mongodb_collection="dev")
+    mongo_pipe.async_coll = mongodb.pipeline
 
     return mongo_pipe
 
@@ -45,11 +43,11 @@ class TestIGUserMongo:
         return mongodb_pipeline
 
     def test_iguser_entries(self, write_iguser):
-        assert len(list(write_iguser.collection.find({}))) == 4
+        assert len(list(write_iguser.async_coll.find({}))) == 4
 
     @pytest.fixture()
     def iguser_main(self, write_iguser):
-        return write_iguser.collection.find_one({"pk": "US#testuser", "sk": {"$regex": "USER"}})
+        return write_iguser.async_coll.find_one({"pk": "US#testuser", "sk": {"$regex": "USER"}})
 
     def test_iguser_main_length(self, iguser_main):
         assert len(iguser_main) == 5
@@ -71,7 +69,7 @@ class TestIGUserMongo:
 
     @pytest.fixture()
     def iguser_update(self, write_iguser):
-        return write_iguser.collection.find_one({"pk": "US#testuser", "sk": {"$regex": "UPDA"}})
+        return write_iguser.async_coll.find_one({"pk": "US#testuser", "sk": {"$regex": "UPDA"}})
 
     def test_iguser_update_length(self, iguser_update):
         assert len(iguser_update) == 7
@@ -93,7 +91,7 @@ class TestIGUserMongo:
 
     @pytest.fixture()
     def iguser_posts(self, write_iguser):
-        return list(write_iguser.collection.find({"sk": "POST"}))
+        return list(write_iguser.async_coll.find({"sk": "POST"}))
 
     def test_iguser_posts_length(self, iguser_posts):
         assert len(iguser_posts) == 2
@@ -133,11 +131,11 @@ class TestIGPostMongo:
         return mongodb_pipeline
 
     def test_igpost_entries(self, write_igpost):
-        assert len(list(write_igpost.collection.find({}))) == 2
+        assert len(list(write_igpost.async_coll.find({}))) == 2
 
     @pytest.fixture()
     def igpost_main(self, write_igpost):
-        return write_igpost.collection.find_one({"pk": "PO#BBA", "sk": {"$regex": "POST"}})
+        return write_igpost.async_coll.find_one({"pk": "PO#BBA", "sk": {"$regex": "POST"}})
 
     def test_igpost_main_length(self, igpost_main):
         assert len(igpost_main) == 6
@@ -156,7 +154,7 @@ class TestIGPostMongo:
 
     @pytest.fixture()
     def igpost_update(self, write_igpost):
-        return write_igpost.collection.find_one({"pk": "PO#BBA", "sk": {"$regex": "UPDA"}})
+        return write_igpost.async_coll.find_one({"pk": "PO#BBA", "sk": {"$regex": "UPDA"}})
 
     def test_igpost_update_length(self, igpost_update):
         assert len(igpost_update) == 9

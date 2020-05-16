@@ -256,42 +256,36 @@ def mongo_dict(item):
 
 
 class MongoDBPipeline(object):
-    def __init__(self, mongo_uri, mongo_db, mongo_collection, mongo_user, mongo_password):
-        self.mongo_uri = mongo_uri
-        self.mongo_db = mongo_db
-        self.mongo_collection = mongo_collection
-        self.mongo_user = mongo_user
-        self.mongo_password = mongo_password
-        self.client = None
-        self.db = None
-        self.collection = None
+    def __init__(self, mongodb_uri, mongodb_db, mongodb_collection):
+        self.mongodb_uri = mongodb_uri
+        self.mongodb_db = mongodb_db
+        self.mongodb_collection = mongodb_collection
+        self.async_client = None
+        self.async_coll = None
         self.codec_options = DEFAULT_CODEC_OPTIONS
 
     @classmethod
     def from_crawler(cls, crawler):
         return cls(
-            mongo_uri=crawler.settings.get('MONGO_URI', 'mongodb://127.0.0.1:27017'),
-            mongo_db=crawler.settings.get('MONGO_DB', 'instascrapy'),
-            mongo_collection=crawler.settings.get('MONGO_COLLECTION'),
-            mongo_user=crawler.settings.get('MONGO_USER'),
-            mongo_password=crawler.settings.get('MONGO_PASSWORD')
+            mongo_uri=crawler.settings.get('MONGODB_URI'),
+            mongo_db=crawler.settings.get('MONGODB_DB'),
+            mongo_collection=crawler.settings.get('MONGODB_COLLECTION'),
         )
 
     @inlineCallbacks
     def open_spider(self, spider):
-        self.client = yield ConnectionPool(self.mongo_uri)
-        self.db = getattr(self.client, self.mongo_db)
-        yield self.db.authenticate(self.mongo_user, self.mongo_password)
-        self.collection = getattr(self.db, self.mongo_collection)
+        self.async_client = yield ConnectionPool(self.mongodb_uri)
+        db = getattr(self.async_client, self.mongodb_db)
+        self.async_coll = getattr(db, self.mongodb_collection)
 
     def close_spider(self, spider):
-        self.client.disconnect()
+        self.async_client.disconnect()
 
     @inlineCallbacks
     def process_item(self, item, spider):
         primary_key, secondary_key, db_entries = mongo_dict(item)
         try:
-            yield self.collection.insert_many(db_entries, ordered=False)
+            yield self.async_coll.insert_many(db_entries, ordered=False)
         except BulkWriteError as e:
             failed_items = ', '.join([x['keyValue']['pk'] for x in e.details['writeErrors']])
             log.debug('Item(s) not written to DB: {}'.format(failed_items))
@@ -300,7 +294,7 @@ class MongoDBPipeline(object):
         set_values['retrieved_at_time'] = item.get('retrieved_at_time')
 
         if isinstance(item, IGPost):
-            yield self.collection.update_one(
+            yield self.async_coll.update_one(
                 {'pk': primary_key, 'sk': secondary_key},
                 {'$set': {
                     'image': item.get('images')[0],
@@ -308,7 +302,7 @@ class MongoDBPipeline(object):
                 }}
             )
         else:
-            yield self.collection.update_one(
+            yield self.async_coll.update_one(
                 {'pk': primary_key, 'sk': secondary_key},
                 {'$set': set_values}
             )

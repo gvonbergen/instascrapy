@@ -1,5 +1,6 @@
 import json
 import time
+from datetime import datetime, timedelta
 
 from scrapy import signals
 from scrapy.spiders import Spider
@@ -51,10 +52,11 @@ class TxMongoSpider(Spider):
 
     def get_entities(self, category, update_mode=False):
         if update_mode:
+            update_limit = int((datetime.now() - timedelta(days=7)).timestamp())
             for result in self.coll.find(
                     {
                         'sk': category,
-                        "retrieved_at_time": {"$exists": True},
+                        "retrieved_at_time": {"$exists": True, "$lt": update_limit},
                         'deleted': {'$exists': False}
                     }
             ):

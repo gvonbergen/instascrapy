@@ -71,11 +71,15 @@ class IgpostSpider(TxMongoSpider):
 
     def parse(self, response):
 
-        ig_post_dict = ig_extract_shared_data(response=response, category="post")
-        ig_post = IGLoader(item=IGPost(), response=response)
-        ig_post = self._parse_post(loader=ig_post, data=ig_post_dict)
+        if b"Restricted" in response.body:
+            self.logger.info("Restricted element: {}".format(response.url))
 
-        yield ig_post.load_item()
+        else:
+            ig_post_dict = ig_extract_shared_data(response=response, category="post")
+            ig_post = IGLoader(item=IGPost(), response=response)
+            ig_post = self._parse_post(loader=ig_post, data=ig_post_dict)
+
+            yield ig_post.load_item()
 
     def errback(self, failure):
         self.logger.debug(repr(failure))

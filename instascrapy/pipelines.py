@@ -51,6 +51,8 @@ def mongo_dict(item):
             'post_id': item.get('id'),
             'json': item.get('post_json')
         })
+        if "location_id" in item:
+            db_entry.update({"location_id": item.get("location_id")})
         db_entries.append(db_entry)
         db_entries.append({'pk': primary_key, 'sk': secondary_key, 'discovered_at_time': retrieved_at_time})
     else:

@@ -123,7 +123,7 @@ class IGPost(scrapy.Item):
     edge_media_preview_like = scrapy.Field()
     edge_media_sponsor_user = scrapy.Field()
     location = scrapy.Field()
-    location_id = scrapy.Field()
+    location_id = scrapy.Field(output_processor=Compose(TakeFirst(), int))
     owner_username = scrapy.Field()
     owner_id = scrapy.Field(output_processor=Compose(TakeFirst(), int))
     is_ad = scrapy.Field()

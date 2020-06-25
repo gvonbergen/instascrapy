@@ -50,16 +50,17 @@ class TxMongoSpider(Spider):
         with open(file_name, 'r') as f:
             return [item for item in json.load(f)]
 
-    def get_entities(self, category, update_mode=False, db_batch_size=500):
+    def get_entities(self, category, update_mode=False, db_batch_size=50):
         if update_mode:
             update_limit = int((datetime.now() - timedelta(days=7)).timestamp())
             for result in self.coll.find(
-                    {
-                        'sk': category,
-                        "retrieved_at_time": {"$exists": True, "$lt": update_limit},
-                        'deleted': {'$exists': False}
-                    },
-                batch_size=db_batch_size
+                {
+                    'sk': category,
+                    "retrieved_at_time": {"$exists": True, "$lt": update_limit},
+                    'deleted': {'$exists': False}
+                },
+                batch_size=db_batch_size,
+                no_cursor_timeout=True
             ):
                 yield result['pk'][3:]
         else:

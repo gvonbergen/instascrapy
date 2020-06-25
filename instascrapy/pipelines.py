@@ -18,49 +18,66 @@ log = logging.getLogger(__name__)
 
 
 def mongo_dict(item):
-    retrieved_at_time = item.get('retrieved_at_time')
+    retrieved_at_time = item.get("retrieved_at_time")
     db_entries = []
-    db_entry = {
-        'retrieved_at_time': retrieved_at_time
-    }
+    db_entry = {"retrieved_at_time": retrieved_at_time}
     if isinstance(item, IGUser):
-        primary_key = 'US#{}'.format(item.get('username'))
-        secondary_key = 'USER'
-        db_entry.update({'pk': primary_key,
-                         'sk': secondary_key_update("US#", retrieved_at_time),
-                         'username': item.get('username'),
-                         'user_id': item.get('id'),
-                         'json': item.get('user_json')})
+        primary_key = "US#{}".format(item.get("username"))
+        secondary_key = "USER"
+        db_entry.update(
+            {
+                "pk": primary_key,
+                "sk": secondary_key_update("US#", retrieved_at_time),
+                "username": item.get("username"),
+                "user_id": item.get("id"),
+                "json": item.get("user_json"),
+            }
+        )
         db_entries.append(db_entry)
-        db_entries.append({'pk': primary_key, 'sk': secondary_key, 'discovered_at_time': retrieved_at_time})
-        for post in item.get('last_posts', []):
-            db_entries.append({
-                'pk': 'PO#{}'.format(post),
-                'sk': 'POST',
-                'discovered_at_time': retrieved_at_time
-            })
+        db_entries.append(
+            {
+                "pk": primary_key,
+                "sk": secondary_key,
+                "discovered_at_time": retrieved_at_time,
+            }
+        )
+        for post in item.get("last_posts", []):
+            db_entries.append(
+                {
+                    "pk": "PO#{}".format(post),
+                    "sk": "POST",
+                    "discovered_at_time": retrieved_at_time,
+                }
+            )
     elif isinstance(item, IGPost):
-        primary_key = 'PO#{}'.format(item.get('shortcode'))
-        secondary_key = 'POST'
-        db_entry.update({
-            'pk': primary_key,
-            'sk': secondary_key_update("PO#", retrieved_at_time),
-            'shortcode': item.get('shortcode'),
-            'username': item.get('owner_username'),
-            'user_id': item.get('owner_id'),
-            'post_id': item.get('id'),
-            'json': item.get('post_json')
-        })
+        primary_key = "PO#{}".format(item.get("shortcode"))
+        secondary_key = "POST"
+        db_entry.update(
+            {
+                "pk": primary_key,
+                "sk": secondary_key_update("PO#", retrieved_at_time),
+                "shortcode": item.get("shortcode"),
+                "username": item.get("owner_username"),
+                "user_id": item.get("owner_id"),
+                "post_id": item.get("id"),
+                "json": item.get("post_json"),
+            }
+        )
         if "location_id" in item:
             db_entry.update({"location_id": item.get("location_id")})
         db_entries.append(db_entry)
-        db_entries.append({'pk': primary_key, 'sk': secondary_key, 'discovered_at_time': retrieved_at_time})
+        db_entries.append(
+            {
+                "pk": primary_key,
+                "sk": secondary_key,
+                "discovered_at_time": retrieved_at_time,
+            }
+        )
     else:
         primary_key = None
         secondary_key = None
 
     return primary_key, secondary_key, db_entries
-
 
 
 class MongoDBPipeline(object):
@@ -75,9 +92,9 @@ class MongoDBPipeline(object):
     @classmethod
     def from_crawler(cls, crawler):
         return cls(
-            mongodb_uri=crawler.settings.get('MONGODB_URI'),
-            mongodb_db=crawler.settings.get('MONGODB_DB'),
-            mongodb_collection=crawler.settings.get('MONGODB_COLLECTION'),
+            mongodb_uri=crawler.settings.get("MONGODB_URI"),
+            mongodb_db=crawler.settings.get("MONGODB_DB"),
+            mongodb_collection=crawler.settings.get("MONGODB_COLLECTION"),
         )
 
     @inlineCallbacks
@@ -95,24 +112,21 @@ class MongoDBPipeline(object):
         try:
             yield self.async_coll.insert_many(db_entries, ordered=False)
         except BulkWriteError as e:
-            failed_items = ', '.join([x['keyValue']['pk'] for x in e.details['writeErrors']])
-            log.debug('Item(s) not written to DB: {}'.format(failed_items))
+            failed_items = ", ".join(
+                [x["keyValue"]["pk"] for x in e.details["writeErrors"]]
+            )
+            log.debug("Item(s) not written to DB: {}".format(failed_items))
 
         set_values = {}
-        set_values['retrieved_at_time'] = item.get('retrieved_at_time')
-
         if isinstance(item, IGPost):
-            yield self.async_coll.update_one(
-                {'pk': primary_key, 'sk': secondary_key},
-                {'$set': {
-                    'image': item.get('images')[0],
-                    **set_values
-                }}
-            )
-        else:
-            yield self.async_coll.update_one(
-                {'pk': primary_key, 'sk': secondary_key},
-                {'$set': set_values}
-            )
+            try:
+                set_values["image"] = item.get("images")[0]
+            except TypeError:
+                pass
+        set_values["retrieved_at_time"] = item.get("retrieved_at_time")
+
+        yield self.async_coll.update_one(
+            {"pk": primary_key, "sk": secondary_key}, {"$set": set_values}
+        )
 
         return item

@@ -18,7 +18,7 @@ pytest = "*"
 brotlipy = "==0.7.0"
 scrapy = "==1.8.0"
 scrapy-rotating-proxies = "==0.6.2"
-pillow = "==7.0.0"
+pillow = "==8.3.2"
 txmongo = "==19.2"
 boto3 = "==1.11.9"
 
